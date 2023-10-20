@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1536
     height: 772.8
   m_ShowMode: 4
-  m_Title: Scene
+  m_Title: Game
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -68,8 +68,8 @@ MonoBehaviour:
     y: 0
     width: 246.40002
     height: 722.8
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 13}
   m_Panes:
   - {fileID: 13}
@@ -94,8 +94,8 @@ MonoBehaviour:
     y: 0
     width: 264
     height: 515.2
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -298,7 +298,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 588.8
-    width: 1298.2
+    width: 1288.6
     height: 186.59998
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -331,14 +331,14 @@ MonoBehaviour:
   m_LastFolders:
   - Assets/Prefabs
   m_LastFoldersGridSize: 90
-  m_LastProjectPath: C:\Users\jerso\VRSandBox-Atlzd
+  m_LastProjectPath: C:\Users\jerso\Documents\GitHub\VR-SandBox-Remastered
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 79}
-    m_SelectedIDs: 3c950000
-    m_LastClickedID: 38204
-    m_ExpandedIDs: 000000001695000000ca9a3b
+    scrollPos: {x: 0, y: 157.40002}
+    m_SelectedIDs: 62950000
+    m_LastClickedID: 38242
+    m_ExpandedIDs: 000000001c950000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -366,7 +366,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000016950000
+    m_ExpandedIDs: 000000001c950000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -508,7 +508,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: a63dfffff23dffff6e4dffff08abffff64abffff54bbfffff6bdffff18fbffffc0710000debb0000
+      m_ExpandedIDs: 18fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -862,9 +862,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 1.7876619, y: 4.9202065, z: -1.5218341}
+    m_Target: {x: 0.18402374, y: 1.7449133, z: -0.19503772}
     speed: 2
-    m_Value: {x: 1.7876619, y: 4.9202065, z: -1.5218341}
+    m_Value: {x: 0.18402374, y: 1.7449133, z: -0.19503772}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -910,9 +910,9 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.25769633, y: 0.21788242, z: -0.059511673, w: 0.9396656}
+    m_Target: {x: 0.21405573, y: 0.3783661, z: -0.09003308, w: 0.8962817}
     speed: 2
-    m_Value: {x: 0.25755614, y: 0.21924858, z: -0.059886377, w: 0.93915313}
+    m_Value: {x: 0.2140121, y: 0.378289, z: -0.090014726, w: 0.89609903}
   m_Size:
     m_Target: 0.8660254
     speed: 2
