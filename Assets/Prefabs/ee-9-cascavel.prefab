@@ -110,7 +110,6 @@ GameObject:
   - component: {fileID: 1385348601077541443}
   - component: {fileID: 115616961455832521}
   - component: {fileID: 4474387931387581675}
-  - component: {fileID: 5256445168517416470}
   m_Layer: 6
   m_Name: ee-9-cascavel
   m_TagString: isOnTerrain
@@ -304,19 +303,6 @@ MonoBehaviour:
   _resetGrabOnGrabsUpdated: 1
   _physicsGrabbable: {fileID: 4510037300194250262}
   _movementProvider: {fileID: 0}
---- !u!114 &5256445168517416470
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6936992176861836892}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06e88a8fdd8886b4fb6a1538372577a2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  highlightMaterial: {fileID: 2100000, guid: 6d823d070fe7f8b4291989b996b0ce99, type: 2}
 --- !u!1001 &646778144316961401
 PrefabInstance:
   m_ObjectHideFlags: 0
