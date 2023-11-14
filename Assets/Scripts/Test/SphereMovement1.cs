@@ -43,8 +43,8 @@ public class SphereMovement1 : MonoBehaviour
             // Verifique se o raio atinge o terreno
             if (Physics.Raycast(ray, out hit))
             {
-                // Ajuste a posição do objeto filho para que ele fique na altura correta
-                Vector3 newPosition = hit.point + Vector3.up * yOffset;
+                // Ajuste a posição do objeto filho para que ele fique na altura correta e acompanhe a esfera
+                Vector3 newPosition = new Vector3(currentPosition.x, hit.point.y + yOffset, currentPosition.z);
                 childObject.position = newPosition;
             }
         }

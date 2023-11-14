@@ -13,42 +13,39 @@ public class ObjectPosition : MonoBehaviour
     public float pixelScale = 1000.0f; // Cada metro do terreno digital corresponde a 1 km no mundo real
 
 
-    void Update()
+    public void Salvar()
     {
-        // Verifica se o botão ou tecla para salvar foi pressionado
-        if (OVRInput.GetDown(OVRInput.Button.Three))
+
+         // Procura todos os objetos na cena com a tag "ObjectOnTerrain"
+         GameObject[] objectsOnTerrain = GameObject.FindGameObjectsWithTag("isOnTerrain");
+
+        // Cria um arquivo de texto para salvar as coordenadas
+        StreamWriter writer = new StreamWriter("object_coordinates.txt");
+
+        // Salva as coordenadas de todos os objetos na cena com a tag "ObjectOnTerrain"
+        foreach (GameObject obj in objectsOnTerrain)
         {
-            // Procura todos os objetos na cena com a tag "ObjectOnTerrain"
-            GameObject[] objectsOnTerrain = GameObject.FindGameObjectsWithTag("SpawnTrigger");
-
-            // Cria um arquivo de texto para salvar as coordenadas
-            StreamWriter writer = new StreamWriter("object_coordinates.txt");
-
-            // Salva as coordenadas de todos os objetos na cena com a tag "ObjectOnTerrain"
-            foreach (GameObject obj in objectsOnTerrain)
-            {
                 // Verifica se o objeto está posicionado sobre o terreno
-                if (obj.transform.position.y >= Terrain.activeTerrain.SampleHeight(obj.transform.position))
-                {
-                    // Obtém a posição do objeto em coordenadas de pixel
-                    Vector3 positionInPixels = obj.transform.position;
+            if (obj.transform.position.y >= Terrain.activeTerrain.SampleHeight(obj.transform.position))
+            {
+                // Obtém a posição do objeto em coordenadas de pixel
+                Vector3 positionInPixels = obj.transform.position;
 
-                    // Converte as coordenadas de pixel em coordenadas de latitude e longitude
-                    float lat = latRef + (positionInPixels.z / pixelScale);
-                    float lon = lonRef + (positionInPixels.x / pixelScale);
+                // Converte as coordenadas de pixel em coordenadas de latitude e longitude
+                float lat = latRef + (positionInPixels.z / pixelScale);
+                float lon = lonRef + (positionInPixels.x / pixelScale);
 
-                    // Salva as coordenadas em um arquivo de texto
-                    writer.WriteLine(obj.name + ":");
-                    writer.WriteLine("Latitude: " + lat);
-                    writer.WriteLine("Longitude: " + lon);
-                    writer.WriteLine("");
+                // Salva as coordenadas em um arquivo de texto
+                writer.WriteLine(obj.name + ":");
+                writer.WriteLine("Latitude: " + lat);
+                writer.WriteLine("Longitude: " + lon);
+                writer.WriteLine("");
                 }
-            }
-
-            // Fecha o arquivo de texto
-            writer.Close();
-
-            Debug.Log("Coordenadas dos objetos salvos em object_coordinates.txt");
         }
+
+        // Fecha o arquivo de texto
+        writer.Close();
+
+        Debug.Log("Coordenadas dos objetos salvos em object_coordinates.txt");
     }
 }
