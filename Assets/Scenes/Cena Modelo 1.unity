@@ -797,8 +797,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 380632140}
-  - component: {fileID: 380632139}
-  - component: {fileID: 380632141}
+  - component: {fileID: 380632144}
+  - component: {fileID: 380632143}
+  - component: {fileID: 380632142}
   m_Layer: 0
   m_Name: Record
   m_TagString: Untagged
@@ -806,18 +807,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &380632139
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 380632138}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22763f7e7b6efb344a4085a6f6801fb7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &380632140
 Transform:
   m_ObjectHideFlags: 0
@@ -827,13 +816,13 @@ Transform:
   m_GameObject: {fileID: 380632138}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.446629, y: 0.38775587, z: 0.7759489}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &380632141
+--- !u!114 &380632142
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -842,11 +831,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 380632138}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 961232161801ece4780dbd2b54906431, type: 3}
+  m_Script: {fileID: 11500000, guid: 015db0589c97ab740b62c6e5de2bee6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrain: {fileID: 0}
-  captureKey: 32
+--- !u!114 &380632143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 380632138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d55d597f903351e4980fdc3ef8997cb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &380632144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 380632138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d531fe545ed932142bbb1528bc79fbe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tagToRecord: isOnTerrain
 --- !u!1 &401931789
 GameObject:
   m_ObjectHideFlags: 0
@@ -3460,21 +3472,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &1159808790
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1159808784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ded134a2b69d56f44956042fd473fd9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  captureKey: 32
-  scenePlane: {fileID: 68084458}
-  savePath: C:/Users/jerso/Documents/GitHub/VR-SandBox-Remastered/Assets/Resultados/
 --- !u!1 &1186952382
 GameObject:
   m_ObjectHideFlags: 0
@@ -8127,9 +8124,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5550776016039436609, guid: f39a9d103c4129b42a53567f6cd8356a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1159808786}
-    - targetCorrespondingSourceObject: {fileID: 5550776016039436609, guid: f39a9d103c4129b42a53567f6cd8356a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1159808790}
   m_SourcePrefab: {fileID: 100100000, guid: f39a9d103c4129b42a53567f6cd8356a, type: 3}
 --- !u!20 &2109553477 stripped
 Camera:

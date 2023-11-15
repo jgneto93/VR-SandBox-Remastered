@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.IO;
 
 public class AlternarCamadas2 : MonoBehaviour
 {
@@ -7,6 +8,9 @@ public class AlternarCamadas2 : MonoBehaviour
     public string camada2Nome; // Nome da segunda camada na Layer Palette
 
     private bool camada1Ativa = true;
+    private float startTime;
+    private string filePath;
+    private StreamWriter sw;
 
     void Start()
     {
@@ -23,15 +27,45 @@ public class AlternarCamadas2 : MonoBehaviour
         }
 
         terrain.terrainData.SetAlphamaps(0, 0, ObterMistura(camada1Ativa));
+
+        // Configurar o arquivo CSV
+        int fileIndex = 1;
+        filePath = $"C:/Users/jerso/Documents/GitHub/VR-SandBox-Remastered/Assets/Resultados/CamadaAtivaData_{fileIndex}.csv";
+
+        while (File.Exists(filePath))
+        {
+            fileIndex++;
+            filePath = $"C:/Users/jerso/Documents/GitHub/VR-SandBox-Remastered/Assets/Resultados/CamadaAtivaData_{fileIndex}.csv";
+        }
+
+        sw = new StreamWriter(filePath);
+        sw.WriteLine("Time,CamadaAtiva");
+        startTime = Time.time;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // Salva o arquivo CSV ao pressionar a tecla espaço
+            sw.Close();
+            Debug.Log($"Arquivo CSV salvo em: {filePath}");
+            Destroy(this); // Destroi o objeto para evitar que continue a gravação após salvar
+        }
     }
 
     public void MudarCamadas()
     {
+        // Registra a mudança de camada e o tempo
+        float currentTime = Time.time;
+        float duration = currentTime - startTime;
+        sw.WriteLine($"{currentTime},{camada1Ativa}");
+        startTime = currentTime;
+
         camada1Ativa = !camada1Ativa;
         float[,,] mistura = ObterMistura(camada1Ativa);
         terrain.terrainData.SetAlphamaps(0, 0, mistura);
     }
-    
 
     private float[,,] ObterMistura(bool camada1Ativa)
     {
@@ -63,5 +97,11 @@ public class AlternarCamadas2 : MonoBehaviour
         }
 
         return mistura;
+    }
+
+    void OnDestroy()
+    {
+        // Encerra e salva o arquivo CSV quando o objeto é destruído
+        sw.Close();
     }
 }

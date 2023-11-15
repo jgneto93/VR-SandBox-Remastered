@@ -845,7 +845,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 961232161801ece4780dbd2b54906431, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrain: {fileID: 0}
+  terrain: {fileID: 1959947876}
   captureKey: 32
 --- !u!1 &401931789
 GameObject:
