@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: UFRGS-AMAN
-  productName: VRSandBox
+  companyName: UFRGS-OTAVIO
+  productName: Immersive Football Visualization
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -135,9 +135,10 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-  bundleVersion: 1.5
+  bundleVersion: 1
   preloadedAssets:
-  - {fileID: 11400000, guid: b9b4b7605b192934791926aad17d25d9, type: 2}
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 2cac1c5f7f4ddf74fb44b96f678fa5c1, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1

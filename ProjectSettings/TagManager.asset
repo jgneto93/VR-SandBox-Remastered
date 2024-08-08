@@ -13,6 +13,8 @@ TagManager:
   - Terrain
   - SpawnsZones
   - frustum
+  - Bola
+  - Joint
   layers:
   - Default
   - TransparentFX

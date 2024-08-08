@@ -1,0 +1,4 @@
+repository "FootballVisualization-Remastered@ProjetoDePesquisaMestrado@cloud"
+  path "/"
+    br "/main"
+    co "/main"
