@@ -6,7 +6,7 @@ public class UserMovementLogger : MonoBehaviour {
     private string logFilePath;
     private Quaternion lastTransform;
     private float timeSinceLastFileCreation = 1f;
-
+    private string lastInput = "";
     public UserMovementLogger() {
         CreateNewTestLogFile();
         timeSinceLastFileCreation = 0f;
@@ -29,16 +29,14 @@ public class UserMovementLogger : MonoBehaviour {
     }
 
     public void LogCustomLine(string line) {
-        string logEntry = $"{Time.time}: {line}";
-        File.AppendAllText(logFilePath, logEntry + "\n");
+        if(line != lastInput) { 
+            string logEntry = $"{Time.time}: {line}";
+            File.AppendAllText(logFilePath, logEntry + "\n");
+            lastInput = line; 
+        }
     }
 
     public void CreateNewTestLogFile() {
-        if (timeSinceLastFileCreation < 1f) {
-            Debug.LogWarning("Aguarde pelo menos 1 segundo antes de criar um novo arquivo de log.");
-            return;
-        }
-
         try {
             // Conta todos os arquivos na pasta
             string[] files = Directory.GetFiles(Application.persistentDataPath);

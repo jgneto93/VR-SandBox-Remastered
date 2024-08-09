@@ -14,7 +14,6 @@ public class resizeTest : MonoBehaviour
     private Dictionary<GameObject, Vector3> initialScales = new Dictionary<GameObject, Vector3>();
     private Dictionary<GameObject, Vector3> targetScales = new Dictionary<GameObject, Vector3>();
     private bool resizedOnce = false; 
-    private GameObject attachedSphere = null;
 
     private void Update()
     {

@@ -20,7 +20,6 @@ public class MenuPrincipalManager : MonoBehaviour
     public GameObject terrain4;
     public GameObject currentDrawing;
 
-    private bool treesOn = false;
     private bool monitorsOn = false;
 
     public void Iniciar()

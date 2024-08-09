@@ -18,21 +18,35 @@ public class MatchInterpreterController : MonoBehaviour {
     public RenderTexture CurrentRenderTexture;
     public RenderTexture NextRenderTexture;
     private bool isSlowMotion = false;
+    private bool isPaused = true;
     int currentFrame = 0;
     
     private GameObject oculusInteractionSampleRig;
     private UserMovementLogger uML;
     private UserInputLogger uIL;
     private float timeSinceLastLog = 0f; // Variável para acumular o tempo
-    private float timeSinceLineTrigger = 0f; // Variável para acumular o tempo
+    private float timeSinceLineInteraction = 0f; // Variável para acumular o tempo
 
     private bool setCameraOnHead = false;
     GameObject referencia = null;
+    string referenciaName ="";
+
     private List<LineRenderer> lrList;
     OVRPlayerController playerController;
+    
+    private int currentTest = 0;
+    private int totalTests = 2;
+
     private bool test1Setup = false;
     private bool test1Started = false;
     private bool test1Finished = false;
+    private bool test1DecisionPause = false;
+
+    private bool test2Setup = false;
+    private bool test2Started = false;
+    private bool test2Finished = false;
+    private bool test2DecisionPause = false;
+
     void Start() {
         // rightController = GameObject.Find("OVRCameraRig/TrackingSpace/RightHandAnchor").transform;
         leftController = GameObject.Find("OVRCameraRig/TrackingSpace/LeftHandAnchor").transform;
@@ -57,36 +71,76 @@ public class MatchInterpreterController : MonoBehaviour {
         currentFrame = jsonReader.GetFrameIndex();
 
         timeSinceLastLog += Time.deltaTime;
-        timeSinceLineTrigger += Time.deltaTime;
+        timeSinceLineInteraction += Time.deltaTime;
 
-        if (test1Setup) {
-            jsonReader.SetFrameIndex(1950);
-            test1Setup = false; 
-            test1Started = true;
-            referencia = GameObject.Find("playerObject 3").GetComponentInChildren<Camera>().gameObject;
-            SetCameraToPlayer(playerController, referencia);
+        if (currentTest == 1) {  // Test 1 proceedings
+            test1Setup = true;
 
+            if (test1Setup && test1Started == false) {
+                uIL.LogCustomLine("Teste 1 Iniciado");
+                uML.LogCustomLine("Teste 1 Iniciado");
+                jsonReader.SetFrameIndex(1950);
+                jsonReader.TogglePlay();
+                test1Setup = false; 
+                test1Started = true;
+                referencia = GameObject.Find("playerObject 3").GetComponentInChildren<Camera>().gameObject;
+                referenciaName = GameObject.Find("playerObject 3").gameObject.name;
+                setCameraOnHead = true;
+                SetCameraToPlayer(playerController, referencia);
+            }
+            if (test1Started && currentFrame < 2250) {
+                SetCameraToPlayer(playerController, referencia);
+                test1Finished = true;
+            }
+            if(currentFrame >= 2243 && currentFrame <= 2247 && !test1DecisionPause) {
+                jsonReader.TogglePlay();
+                test1DecisionPause = true;
+            }
+
+            if (test1Finished && currentFrame >= 2350) {
+                NextTest();
+            }   
         }
-        if (test1Started && currentFrame < 2250 && !test1Finished) {
-            Time.timeScale = .375f;
-        }
+        if (currentTest == 2) {
 
-        if (test1Finished && currentFrame >= 2300) {
+            test2Setup = true;
             
-            ResetTest();
+            if (test2Setup && test2Started == false) {
+                uIL.LogCustomLine("Teste 2 Iniciado");
+                uML.LogCustomLine("Teste 2 Iniciado");
+                jsonReader.SetFrameIndex(450);
+                jsonReader.TogglePlay();
+                test2Setup = false;
+                test2Started = true;
+                referencia = GameObject.Find("playerObject 10").GetComponentInChildren<Camera>().gameObject;
+                referenciaName = GameObject.Find("playerObject 10").gameObject.name;
+                setCameraOnHead = true;
+                SetCameraToPlayer(playerController, referencia);
+            }
+            if (test2Started && currentFrame < 650) {
+                SetCameraToPlayer(playerController, referencia);
+                test2Finished = true;
 
+            }
+            if (currentFrame >= 638 && currentFrame <= 640 && !test2DecisionPause) {
+                jsonReader.TogglePlay();
+                test2DecisionPause = true;
+            }
+            if (test2Finished && currentFrame >= 700) {
+                NextTest();
+            }
         }
+
 
         // Verifica se um segundo se passou
-        if (timeSinceLastLog >= 1f) {
-            setCameraOnHead = true;
+        if (timeSinceLastLog >= .5f) {
             uML.LogMovement(oculusInteractionSampleRig.transform);
             timeSinceLastLog = 0f; // Reseta o acumulador de tempo
         }
         
         if (playerController.enabled is false && setCameraOnHead == true) {
             SetCameraToPlayer(playerController, referencia);
-            uIL.LogUserInput("Vendo o Ponto de Vista do Jogador");
+            uIL.LogUserInput($"Vendo o Ponto de Vista do Jogador {referenciaName}");
         }
 
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y > 0.5f) {
@@ -100,13 +154,18 @@ public class MatchInterpreterController : MonoBehaviour {
 
 
         if (OVRInput.GetDown(OVRInput.Button.One)) { // Pausa ou despausa a cena
-            uIL.LogUserInput("Pause/Unpause");
-            jsonReader.TogglePlay(); 
+            if (isPaused) { 
+                uIL.LogUserInput("Unpause");
+            } else {
+                uIL.LogUserInput("Pause");
+            }
+            jsonReader.TogglePlay();
+            isPaused = !isPaused;
         }
 
 
         if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger)) {
-            if (timeSinceLineTrigger >= .175f) {
+            if (timeSinceLineInteraction >= .175f) {
                 Ray ray = new(leftController.position, leftController.forward);
                 laserLineRenderer.SetPosition(0, leftController.position); // Set the start position of the laser line
                 if (Physics.Raycast(ray, out RaycastHit hit) && hit.transform.parent.name != "Stadium") {
@@ -115,22 +174,23 @@ public class MatchInterpreterController : MonoBehaviour {
 
                     jsonReader.SetPlayerHeatMap(parent.gameObject, true);
                     referencia = parent.GetComponentInChildren<Camera>().gameObject;
-
+                    referenciaName = parent.gameObject.name;
                     if (parent != null) {
                         Tracer tracer = parent.GetComponentInChildren<Tracer>();
                         if (tracer != null) {
                             LineRenderer lineRenderer = tracer.GetComponent<LineRenderer>();
                             if (lineRenderer != null) {
                                 lineRenderer.enabled = !lineRenderer.enabled;
-                                uIL.LogUserInput("Path do Jogador Ativado");
-
+                                if (!setCameraOnHead) { 
+                                    uIL.LogUserInput($"Path do Jogador {referenciaName} Ativado");
+                                }
                             }
                         }
 
                         if (parent.GetComponentInChildren<Camera>().gameObject != null || hit.transform.parent.name is not "BallPrefab" || hit.transform.parent.name is not "Stadium") {
                             if (OVRInput.GetDown(OVRInput.Button.Four)) {
                                 setCameraOnHead = true;
-                                timeSinceLineTrigger = 0f; // Reseta o acumulador de tempo
+                                timeSinceLineInteraction = 0f; // Reseta o acumulador de tempo
                                 SetCameraToPlayer(playerController, referencia);
                             }
                         }
@@ -203,9 +263,12 @@ public class MatchInterpreterController : MonoBehaviour {
 
         if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger) && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) &&
             OVRInput.Get(OVRInput.Button.Two) && OVRInput.Get(OVRInput.Button.Four)) {
-            StartTest(oculusInteractionSampleRig);
-        }
 
+            if (timeSinceLineInteraction >= .5f) {
+                NextTest();
+                timeSinceLineInteraction = 0f;
+            }
+        }
     }
 
     void SetCameraToPlayer(OVRPlayerController playerController, GameObject referencia) {
@@ -232,19 +295,38 @@ public class MatchInterpreterController : MonoBehaviour {
         }
     }
 
-    void ResetTest() {
+    void NextTest() {
+        setCameraOnHead = false;
+        jsonReader.TogglePlay();
 
+        uML.LogCustomLine($"Teste {currentTest} Finalizado");
+        uIL.LogCustomLine($"Teste {currentTest} Finalizado");
+        currentTest += 1;
 
-        uML.LogCustomLine("Teste Finalizado e Resetado");
-        uIL.LogCustomLine("Teste Finalizado e Resetado");
-        uML.CreateNewTestLogFile();
-        uIL.CreateNewTestLogFile();
+        if(currentTest > totalTests) {
+            ResetTest();
+        }
     }
 
-    void StartTest(GameObject oculusInteractionSampleRig) {
-        //TestDrill1(oculusInteractionSampleRig);
-        test1Setup= true;
-        uIL.LogCustomLine("Teste Iniciado por Comando");
+    void ResetBooleans() {
+        test1Finished = false;
+        test1Setup = false;
+        test1Started = false;
+        test1DecisionPause = false;
+        test2Finished = false;
+        test2DecisionPause = false;
+        test2Setup = false;
+        test2Started = false;
+    }
+
+    void ResetTest() {
+        ResetBooleans();
+
+        currentTest = 0;
+        uML.LogCustomLine("Todos os Testes Finalizados");
+        uIL.LogCustomLine("Todos os Testes Finalizados");
+        uML.CreateNewTestLogFile();
+        uIL.CreateNewTestLogFile();
     }
 
 }

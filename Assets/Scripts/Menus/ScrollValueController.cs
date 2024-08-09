@@ -13,8 +13,6 @@ public class ScrollValueController : MonoBehaviour
     public OVRInput.Button endButton = OVRInput.Button.Two; // Botão de fim da tarefa
 
     // Valor mínimo e máximo para as sliders
-    private float minValue = 0f;
-    private float maxValue = 2000f;
     private float stepSize = 10f;
 
     private bool taskStarted = false;
