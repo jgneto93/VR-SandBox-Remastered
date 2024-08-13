@@ -2182,10 +2182,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Acceleration: 0.3
   Damping: 0.3
-  BackAndSideDampen: 0.5
+  BackAndSideDampen: 0.13
   JumpForce: 0.3
   RotationAmount: 1
-  RotationRatchet: 30
+  RotationRatchet: 15
   SnapRotation: 0
   RotateAroundGuardianCenter: 0
   FixedSpeedSteps: 0

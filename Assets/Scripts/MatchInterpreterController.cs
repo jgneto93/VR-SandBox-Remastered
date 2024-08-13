@@ -29,23 +29,33 @@ public class MatchInterpreterController : MonoBehaviour {
 
     private bool setCameraOnHead = false;
     GameObject referencia = null;
-    string referenciaName ="";
+    string referenciaName = "";
 
     private List<LineRenderer> lrList;
     OVRPlayerController playerController;
     
     private int currentTest = 0;
-    private int totalTests = 2;
+    private int totalTests = 11;
 
-    private bool test1Setup = false;
-    private bool test1Started = false;
-    private bool test1Finished = false;
-    private bool test1DecisionPause = false;
+    private bool isPlayingTest = false;
 
-    private bool test2Setup = false;
-    private bool test2Started = false;
-    private bool test2Finished = false;
-    private bool test2DecisionPause = false;
+    private bool testStarted = false;
+    private bool testFinished = false;
+    private bool testDecisionPause = false;
+
+    private GameObject testMessageObject;
+
+    private int[] frameNumbers = {
+        2250,640, 9336, 9066, 7490, 7038, 6879, 4492, 3589, 1123, 790
+    };
+
+    private string[] playerObjects = {
+        "playerObject 3", "playerObject 10", "playerObject 14", "playerObject 12",
+        "playerObject 3", "playerObject 5",
+        "playerObject 16", "playerObject 5", "playerObject 14", "playerObject 66",
+        "playerObject 3"
+    };
+
 
     void Start() {
         // rightController = GameObject.Find("OVRCameraRig/TrackingSpace/RightHandAnchor").transform;
@@ -67,68 +77,53 @@ public class MatchInterpreterController : MonoBehaviour {
         uIL = new();
     }
 
+    void PauseUnpause() {
+        if (!isPaused) {
+            uIL.LogCustomLine("Pausado");
+        } else
+            uIL.LogCustomLine("DesPausado");
+
+        jsonReader.TogglePlay();
+        isPaused = !isPaused;
+    }
+
     void Update() {
         currentFrame = jsonReader.GetFrameIndex();
 
         timeSinceLastLog += Time.deltaTime;
         timeSinceLineInteraction += Time.deltaTime;
-
-        if (currentTest == 1) {  // Test 1 proceedings
-            test1Setup = true;
-
-            if (test1Setup && test1Started == false) {
-                uIL.LogCustomLine("Teste 1 Iniciado");
-                uML.LogCustomLine("Teste 1 Iniciado");
-                jsonReader.SetFrameIndex(1950);
-                jsonReader.TogglePlay();
-                test1Setup = false; 
-                test1Started = true;
-                referencia = GameObject.Find("playerObject 3").GetComponentInChildren<Camera>().gameObject;
-                referenciaName = GameObject.Find("playerObject 3").gameObject.name;
+        if (isPlayingTest) {
+            if (testStarted == false) {
+                uIL.LogCustomLine($"Teste {currentTest} Iniciado");
+                uML.LogCustomLine($"Teste {currentTest} Iniciado");
+                jsonReader.SetFrameIndex(frameNumbers[currentTest - 1] - 155);
+                testStarted = true;
+                referencia = GameObject.Find(playerObjects[currentTest - 1]).GetComponentInChildren<Camera>().gameObject;
+                referenciaName = GameObject.Find(playerObjects[currentTest - 1]).gameObject.name;
                 setCameraOnHead = true;
                 SetCameraToPlayer(playerController, referencia);
+                if (!isPaused)
+                    PauseUnpause();
+                ShowTestMessage($"Teste {currentTest} de {totalTests} Iniciado" +
+                    $"\n - Identifique em Voz Alta" +
+                    $"\n*Qual Seu Time" +
+                    $"\n*Quem está com a bola" +
+                    $"\n*O seu Arredor" +
+                    $"\n ** E que decisão você tomaria nesse lance? " +
+                    $"\n -- Pressione A para continuar --");
             }
-            if (test1Started && currentFrame < 2250) {
+            if (testStarted && currentFrame < frameNumbers[currentTest - 1] - 150) {
                 SetCameraToPlayer(playerController, referencia);
-                test1Finished = true;
+                testFinished = true;
             }
-            if(currentFrame >= 2243 && currentFrame <= 2247 && !test1DecisionPause) {
-                jsonReader.TogglePlay();
-                test1DecisionPause = true;
+            if (currentFrame >= (frameNumbers[currentTest - 1] - 3) && currentFrame <= (frameNumbers[currentTest - 1] +3 ) && !testDecisionPause) {
+                if(!isPaused)
+                    PauseUnpause();
+                testDecisionPause = true;
             }
-
-            if (test1Finished && currentFrame >= 2350) {
+            if (testFinished && currentFrame >= (frameNumbers[currentTest - 1] + 200)) {
                 NextTest();
             }   
-        }
-        if (currentTest == 2) {
-
-            test2Setup = true;
-            
-            if (test2Setup && test2Started == false) {
-                uIL.LogCustomLine("Teste 2 Iniciado");
-                uML.LogCustomLine("Teste 2 Iniciado");
-                jsonReader.SetFrameIndex(450);
-                jsonReader.TogglePlay();
-                test2Setup = false;
-                test2Started = true;
-                referencia = GameObject.Find("playerObject 10").GetComponentInChildren<Camera>().gameObject;
-                referenciaName = GameObject.Find("playerObject 10").gameObject.name;
-                setCameraOnHead = true;
-                SetCameraToPlayer(playerController, referencia);
-            }
-            if (test2Started && currentFrame < 650) {
-                SetCameraToPlayer(playerController, referencia);
-                test2Finished = true;
-
-            }
-            if (currentFrame >= 638 && currentFrame <= 640 && !test2DecisionPause) {
-                jsonReader.TogglePlay();
-                test2DecisionPause = true;
-            }
-            if (test2Finished && currentFrame >= 700) {
-                NextTest();
-            }
         }
 
 
@@ -140,7 +135,6 @@ public class MatchInterpreterController : MonoBehaviour {
         
         if (playerController.enabled is false && setCameraOnHead == true) {
             SetCameraToPlayer(playerController, referencia);
-            uIL.LogUserInput($"Vendo o Ponto de Vista do Jogador {referenciaName}");
         }
 
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y > 0.5f) {
@@ -152,15 +146,9 @@ public class MatchInterpreterController : MonoBehaviour {
             uIL.LogCustomLine("Tempo Retrocedido");
         }
 
-
         if (OVRInput.GetDown(OVRInput.Button.One)) { // Pausa ou despausa a cena
-            if (isPaused) { 
-                uIL.LogUserInput("Unpause");
-            } else {
-                uIL.LogUserInput("Pause");
-            }
-            jsonReader.TogglePlay();
-            isPaused = !isPaused;
+            HideTestMessage();
+            PauseUnpause();
         }
 
 
@@ -247,10 +235,10 @@ public class MatchInterpreterController : MonoBehaviour {
             CharacterController cc = parent.GetComponent<CharacterController>();
             cc.enabled = false;
             if (isOnField) {
-                uIL.LogUserInput("TP campo");
+                uIL.LogUserInput("TP Campo");
                 cameraRig.transform.parent.position = new Vector3(0, 1, 0);
             } else {
-                uIL.LogUserInput("TP arquibancada");
+                uIL.LogUserInput("TP Arquibancada");
                 cameraRig.transform.parent.position = new Vector3(0, 17, -53);
             }
             cc.enabled = true;
@@ -263,8 +251,8 @@ public class MatchInterpreterController : MonoBehaviour {
 
         if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger) && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) &&
             OVRInput.Get(OVRInput.Button.Two) && OVRInput.Get(OVRInput.Button.Four)) {
-
             if (timeSinceLineInteraction >= .5f) {
+                isPlayingTest = true;
                 NextTest();
                 timeSinceLineInteraction = 0f;
             }
@@ -276,6 +264,8 @@ public class MatchInterpreterController : MonoBehaviour {
 
         playerController.enabled = false;
         if (OVRInput.Get(OVRInput.Button.Start)) {
+            uIL.LogUserInput($"Vendo o Ponto de Vista do Jogador {referenciaName}");
+
             uIL.LogUserInput("Saiu da Visão do Jogador");
             playerController.enabled = true;
             setCameraOnHead = false;
@@ -295,41 +285,59 @@ public class MatchInterpreterController : MonoBehaviour {
         }
     }
 
-    void NextTest() {
-        setCameraOnHead = false;
-        jsonReader.TogglePlay();
-
+   void NextTest() {
         uML.LogCustomLine($"Teste {currentTest} Finalizado");
         uIL.LogCustomLine($"Teste {currentTest} Finalizado");
-        currentTest += 1;
 
-        if(currentTest > totalTests) {
+        currentTest += 1;
+        ResetBooleans();
+        if (currentTest >= totalTests) {
             ResetTest();
         }
     }
 
     void ResetBooleans() {
-        test1Finished = false;
-        test1Setup = false;
-        test1Started = false;
-        test1DecisionPause = false;
-        test2Finished = false;
-        test2DecisionPause = false;
-        test2Setup = false;
-        test2Started = false;
+        testFinished = false;
+        testStarted = false;
+        testDecisionPause = false;
     }
 
     void ResetTest() {
+        setCameraOnHead = false;
+        playerController.enabled = true;
         ResetBooleans();
-
+        isPlayingTest = false;
         currentTest = 0;
         uML.LogCustomLine("Todos os Testes Finalizados");
         uIL.LogCustomLine("Todos os Testes Finalizados");
         uML.CreateNewTestLogFile();
         uIL.CreateNewTestLogFile();
+    
     }
+    void ShowTestMessage(string message) {
+        // Cria um novo GameObject para a mensagem de teste
+        testMessageObject = new GameObject("TestMessage");
 
+        // Adiciona um componente TextMesh ao GameObject
+        TextMesh textMesh = testMessageObject.AddComponent<TextMesh>();
+        textMesh.text = message;
+        textMesh.fontSize = 12;
+        textMesh.color = Color.white;
+
+        // Define a posição do texto na frente do oculusInteractionSampleRig
+        testMessageObject.transform.position = oculusInteractionSampleRig.transform.position + oculusInteractionSampleRig.transform.forward * 10.0f;
+        testMessageObject.transform.rotation = Quaternion.LookRotation(oculusInteractionSampleRig.transform.forward);
+
+    }
+    void HideTestMessage() {
+        if (testMessageObject != null) {
+            Destroy(testMessageObject);
+            testMessageObject = null;
+        }
+    }
 }
+
+
 
 /*  void TestDrill1(GameObject oculusInteractionSampleRig) {
       OVRPlayerController playerController = oculusInteractionSampleRig.GetComponent<OVRPlayerController>();
