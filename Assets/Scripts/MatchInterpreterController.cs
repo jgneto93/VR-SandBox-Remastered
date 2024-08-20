@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-
 using System.Collections.Generic;
 using System.IO;
 using Unity.VisualScripting;
@@ -21,12 +20,13 @@ public class MatchInterpreterController : MonoBehaviour {
     private bool isPaused = true;
     int currentFrame = 0;
     
-    private GameObject oculusInteractionSampleRig;
+    public GameObject oculusInteractionSampleRig;
     private UserMovementLogger uML;
     private UserInputLogger uIL;
     private float timeSinceLastLog = 0f; // Variável para acumular o tempo
     private float timeSinceLineInteraction = 0f; // Variável para acumular o tempo
 
+    private LineRenderer lastLinerenderer =null ;
     private bool setCameraOnHead = false;
     GameObject referencia = null;
     string referenciaName = "";
@@ -56,7 +56,7 @@ public class MatchInterpreterController : MonoBehaviour {
         "playerObject 3"
     };
 
-
+    
     void Start() {
         // rightController = GameObject.Find("OVRCameraRig/TrackingSpace/RightHandAnchor").transform;
         leftController = GameObject.Find("OVRCameraRig/TrackingSpace/LeftHandAnchor").transform;
@@ -168,7 +168,11 @@ public class MatchInterpreterController : MonoBehaviour {
                         if (tracer != null) {
                             LineRenderer lineRenderer = tracer.GetComponent<LineRenderer>();
                             if (lineRenderer != null) {
+                                if (lastLinerenderer is null)
+                                    lastLinerenderer = lineRenderer;    
+                                lastLinerenderer.enabled = false;
                                 lineRenderer.enabled = !lineRenderer.enabled;
+                                lastLinerenderer = lineRenderer;
                                 if (!setCameraOnHead) { 
                                     uIL.LogUserInput($"Path do Jogador {referenciaName} Ativado");
                                 }
@@ -257,6 +261,8 @@ public class MatchInterpreterController : MonoBehaviour {
                 timeSinceLineInteraction = 0f;
             }
         }
+
+        jsonReader.UpdateShirtNumberRotation(oculusInteractionSampleRig.transform);
     }
 
     void SetCameraToPlayer(OVRPlayerController playerController, GameObject referencia) {

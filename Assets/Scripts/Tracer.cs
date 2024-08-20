@@ -15,8 +15,19 @@ public class Tracer : MonoBehaviour {
     }
 
     public void AddVector3ToLineRenderer(Vector3 coord) {
-        lineRenderer.material.color = lineColor;
-        lineRenderer.positionCount++;
-        lineRenderer.SetPosition(lineRenderer.positionCount - 1, coord);
+        if (lineRenderer.enabled == true) { 
+            lineRenderer.material.color = lineColor;
+
+            if (lineRenderer.positionCount >= 720) {
+                // Remove the first point to keep the count at 360
+                for (int i = 1; i < lineRenderer.positionCount; i++) {
+                    lineRenderer.SetPosition(i - 1, lineRenderer.GetPosition(i));
+                }
+                lineRenderer.positionCount--;
+            }
+
+            lineRenderer.positionCount++;
+            lineRenderer.SetPosition(lineRenderer.positionCount - 1, coord);
+        }
     }
 }

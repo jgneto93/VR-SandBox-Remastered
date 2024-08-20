@@ -22,7 +22,7 @@ public class UserMovementLogger : MonoBehaviour {
             lastTransform = transform.rotation;
         }
         if (lastTransform != transform.rotation) {
-            string logEntry = $"{Time.time}: Position - {transform.position}, Rotation - {transform.rotation}";
+            string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
             File.AppendAllText(logFilePath, logEntry + "\n");
         }
         lastTransform = transform.rotation;

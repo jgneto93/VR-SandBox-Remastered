@@ -4,6 +4,8 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 
 public class JSONReader : MonoBehaviour {
@@ -31,6 +33,8 @@ public class JSONReader : MonoBehaviour {
     private int currentEventIndex = 0;
 
     public Dictionary<int, int> jerseyNumberToIndexMap = new Dictionary<int, int>();
+
+    public List<GameObject> shirtNumberObjects = new();
 
      void LoadAllJSONData() { // Old LoadAllJsonData
         TextAsset[] textFiles = Resources.LoadAll<TextAsset>("frames/");
@@ -237,6 +241,14 @@ public class JSONReader : MonoBehaviour {
                 Tracer tracer = tracerObject.AddComponent<Tracer>();
                 // Set the color of the tracer
                 tracer.lineColor = setColor.GetColor(personData.roleId, personData.teamId, playerIndex);
+
+                GameObject tshirtNumber = new GameObject("ShirtNumber");
+                tshirtNumber.transform.SetParent(playerObject.transform);
+                TextMesh number = tshirtNumber.AddComponent<TextMesh>();
+                number.text = personData.jerseyNumber.ToString();
+                number.fontSize = 8;
+                number.color = setColor.GetColor(personData.roleId, personData.teamId);
+                shirtNumberObjects.Add(tshirtNumber);
             }
 
             Vector3 position = new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]);
@@ -244,6 +256,9 @@ public class JSONReader : MonoBehaviour {
 
             Tracer playerTracer = playerObject.transform.Find("PathRenderer").GetComponentInChildren<Tracer>();
             playerTracer.AddVector3ToLineRenderer(position);
+
+            Transform shirtNumberTransform = playerObject.transform.Find("ShirtNumber");
+            shirtNumberTransform.position = position + new Vector3(0, 2, 0);
 
             for (int i = 0; i < personData.positions.Count; i += 3) {
                 Vector3 jointPosition = new Vector3(personData.positions[i], personData.positions[i + 2], personData.positions[i + 1]); // Adjust the axes as needed
@@ -269,7 +284,9 @@ public class JSONReader : MonoBehaviour {
                 }
             }
             UpdateCameras(playerObject, personData);
-
+            
+            
+            
             LineRenderer lineRenderer = playerObject.GetComponent<LineRenderer>();
             if (lineRenderer == null) {
                 lineRenderer = playerObject.AddComponent<LineRenderer>();
@@ -279,6 +296,8 @@ public class JSONReader : MonoBehaviour {
             lineRenderer.positionCount = 0;
             // Set the position count before the loop
             lineRenderer.positionCount = connections.Count;
+
+
 
             for (int connectionIndex = 0; connectionIndex < connections.Count; connectionIndex++) {
                 int jointIndex = connections[connectionIndex];
@@ -355,6 +374,12 @@ public class JSONReader : MonoBehaviour {
         return personData;
     }
 
+    public void UpdateShirtNumberRotation(Transform user) {
+        foreach (GameObject shirt in shirtNumberObjects) {
+            shirt.transform.LookAt(user.position);
+            shirt.transform.Rotate(0, 180, 0); 
+        }
+    }
 
     private void UpdateOrInstantiateCircleAtPlayerPosition(GameObject playerObject, Vector3 playerPosition, Color color) {
         // Try to find the existing circle
