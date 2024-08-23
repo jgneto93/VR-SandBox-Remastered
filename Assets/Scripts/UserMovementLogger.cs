@@ -4,36 +4,19 @@ using UnityEngine;
 
 public class UserMovementLogger : MonoBehaviour {
     private string logFilePath;
-    private Quaternion lastTransform;
-    private float timeSinceLastFileCreation = 1f;
-    private string lastInput = "";
     public UserMovementLogger() {
         CreateNewTestLogFile();
-        timeSinceLastFileCreation = 0f;
-    }
-
-    void Update() {
-        // Atualiza o tempo decorrido
-        timeSinceLastFileCreation += Time.deltaTime;
     }
 
     public void LogMovement(Transform transform) {
-        if (lastTransform == null) {
-            lastTransform = transform.rotation;
-        }
-        if (lastTransform != transform.rotation) {
-            string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
-            File.AppendAllText(logFilePath, logEntry + "\n");
-        }
-        lastTransform = transform.rotation;
+        string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
+        File.AppendAllText(logFilePath, logEntry + "\n");
+
     }
 
     public void LogCustomLine(string line) {
-        if(line != lastInput) { 
-            string logEntry = $"{Time.time}: {line}";
-            File.AppendAllText(logFilePath, logEntry + "\n");
-            lastInput = line; 
-        }
+        string logEntry = $"{Time.time}: {line}";
+        File.AppendAllText(logFilePath, logEntry + "\n");
     }
 
     public void CreateNewTestLogFile() {
@@ -51,9 +34,6 @@ public class UserMovementLogger : MonoBehaviour {
 
             // Atualiza o logFilePath com o novo caminho
             logFilePath = newLogFilePath;
-
-            // Reseta o tempo desde a última criação de arquivo
-            timeSinceLastFileCreation = 0f;
 
             Debug.Log($"Novo arquivo de log criado: {newLogFilePath}");
         } catch (UnauthorizedAccessException e) {

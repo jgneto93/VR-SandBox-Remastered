@@ -4,29 +4,16 @@ using UnityEngine;
 
 public class UserInputLogger : MonoBehaviour {
     private string logFilePath;
-    private float timeSinceLastFileCreation = 1f;
-    private string lastInput = "";
     public UserInputLogger() {
         CreateNewTestLogFile();
-        timeSinceLastFileCreation = 0f;
-    }
-    void Update() {
-        // Atualiza o tempo decorrido
-        timeSinceLastFileCreation += Time.deltaTime;
     }
     public void LogUserInput(string userInput) {
-        if(lastInput != userInput) { 
-            string logEntry = $"{Time.time}: {userInput}";
-            File.AppendAllText(logFilePath, logEntry + "\n");
-            lastInput = userInput;
-        }
+        string logEntry = $"{Time.time}: {userInput}";
+        File.AppendAllText(logFilePath, logEntry + "\n");
     }
     public void LogCustomLine(string line) {
-        if (line != lastInput) { 
-            string logEntry = $"{Time.time}: {line}";
-            File.AppendAllText(logFilePath, logEntry + "\n");
-            lastInput = line;
-        }
+        string logEntry = $"{Time.time}: {line}";
+        File.AppendAllText(logFilePath, logEntry + "\n");
     }
     public void CreateNewTestLogFile() {
         try {
@@ -43,8 +30,6 @@ public class UserInputLogger : MonoBehaviour {
             
             logFilePath = newLogFilePath;
             
-            timeSinceLastFileCreation = 0f;
-
             Debug.Log($"Novo arquivo de log criado: {newLogFilePath}");
 
         } catch (UnauthorizedAccessException e) {

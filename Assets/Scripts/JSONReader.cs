@@ -32,7 +32,7 @@ public class JSONReader : MonoBehaviour {
     public List<TouchData> touchDataList = new List<TouchData>();
     private int currentEventIndex = 0;
 
-    public Dictionary<int, int> jerseyNumberToIndexMap = new Dictionary<int, int>();
+    public Dictionary<int, int> newIDNumberToIndexMap = new Dictionary<int, int>();
 
     public List<GameObject> shirtNumberObjects = new();
 
@@ -70,7 +70,8 @@ public class JSONReader : MonoBehaviour {
                         jerseyNumber = personData.jerseyNumber,
                         roleId = personData.roleId,
                         teamId = personData.teamId,
-                        trackId = personData.trackId
+                        trackId = personData.trackId,
+                        newId = int.Parse(personData.jerseyNumber.ToString()+ "" + personData.teamId.ToString() + "" + personData.trackId)
                     };
                     person.jointIds = personData.jointIds;
                     person.positions = personData.positions;
@@ -88,7 +89,7 @@ public class JSONReader : MonoBehaviour {
                     if (IsColliding(jointPosition, ballPosition, 0.2f)) { // Check if the joint position collides with the ball position
                         TouchData touchData = new TouchData {
                             frameId = j,
-                            playerId = personData.jerseyNumber, // Assuming trackId is the unique identifier for a player
+                            playerId = personData.newId, // Assuming trackId is the unique identifier for a player
                             playerTeamId = personData.teamId,
                             playerRoleId = personData.roleId,
                             playerPosition = jointPosition
@@ -220,6 +221,7 @@ public class JSONReader : MonoBehaviour {
         playerPrefab = emptyGameObject;
         List<int> connections = new List<int> { 1, 16, 0, 17, 1, 0, 16, 17, 0, 1, 5, 6, 7, 6, 5, 1, 2, 3, 4, 3, 2, 1, 11, 12, 13, 12, 11, 8, 9, 10, 9, 8, 1 };
         List<Person> framePeople = peopleFramesList[frameIndex];
+        ;
 
         for (int playerIndex = 0; playerIndex < framePeople.Count; playerIndex++) {
             Person personData = framePeople[playerIndex];
@@ -228,9 +230,9 @@ public class JSONReader : MonoBehaviour {
             if (playerObject == null) {
 
                 playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-                playerObject.name = "playerObject " + personData.jerseyNumber;
+                playerObject.name = "playerObject " + personData.newId;
 
-                jerseyNumberToIndexMap[personData.jerseyNumber] = playerIndex;
+                newIDNumberToIndexMap[personData.newId] = playerIndex;
 
                 playersList.Add(playerObject);
                 jointObjects.Add(playerObject);
@@ -240,22 +242,27 @@ public class JSONReader : MonoBehaviour {
                 tracerObject.transform.SetParent(playerObject.transform);
                 Tracer tracer = tracerObject.AddComponent<Tracer>();
                 // Set the color of the tracer
-                tracer.lineColor = setColor.GetColor(personData.roleId, personData.teamId, playerIndex);
+                tracer.lineColor = setColor.GetColor(personData.teamId, personData.roleId, playerIndex);
 
                 GameObject tshirtNumber = new GameObject("ShirtNumber");
+                tshirtNumber.transform.localScale = new Vector3(0.04f, .04f, .04f);
                 tshirtNumber.transform.SetParent(playerObject.transform);
                 TextMesh number = tshirtNumber.AddComponent<TextMesh>();
-                number.text = personData.jerseyNumber.ToString();
-                number.fontSize = 8;
-                number.color = setColor.GetColor(personData.roleId, personData.teamId);
+                number.text = (personData.jerseyNumber).ToString();
+                number.fontSize = 200;
+                number.color = setColor.GetColor(personData.teamId, personData.roleId);
                 shirtNumberObjects.Add(tshirtNumber);
             }
 
             Vector3 position = new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]);
-            UpdateOrInstantiateCircleAtPlayerPosition(playerObject, position, setColor.GetColor(personData.roleId, personData.teamId));
+
+            UpdateOrInstantiateCircleAtPlayerPosition(playerObject, position, personData.roleId==3? setColor.GetColor(personData.teamId, personData.roleId):setColor.GetColor(personData.teamId) );
 
             Tracer playerTracer = playerObject.transform.Find("PathRenderer").GetComponentInChildren<Tracer>();
-            playerTracer.AddVector3ToLineRenderer(position);
+            
+            if (position != null) { 
+                playerTracer.AddVector3ToLineRenderer(position);
+            }
 
             Transform shirtNumberTransform = playerObject.transform.Find("ShirtNumber");
             shirtNumberTransform.position = position + new Vector3(0, 2, 0);
@@ -278,7 +285,7 @@ public class JSONReader : MonoBehaviour {
                     sphereCollider.radius = 1.0f;
                     jointObject.tag = "Joint";
                     // Set color using the GetColor function
-                    setColor.SetObjectColor(jointObject, setColor.GetColor(personData.roleId, personData.teamId, playerIndex));
+                    setColor.SetObjectColor(jointObject, setColor.GetColor(personData.teamId, personData.roleId, playerIndex));
                 } else {
                     jointObject.transform.position = jointPosition;
                 }
@@ -297,46 +304,18 @@ public class JSONReader : MonoBehaviour {
             // Set the position count before the loop
             lineRenderer.positionCount = connections.Count;
 
-
-
             for (int connectionIndex = 0; connectionIndex < connections.Count; connectionIndex++) {
                 int jointIndex = connections[connectionIndex];
                 Transform jointTransform = playerObject.transform.Find("JointObject_" + jointIndex);
                 GameObject jointObject = jointTransform.gameObject;
                 lineRenderer.SetPosition(connectionIndex, jointObject.transform.position);
-                setColor.SetObjectColor(lineRenderer, setColor.GetColor(personData.roleId, personData.teamId));
+                setColor.SetObjectColor(lineRenderer, setColor.GetColor(personData.teamId, personData.roleId));
             }
 
             for (int i = connections.Count; i < lineRenderer.positionCount; i++) {
                 lineRenderer.SetPosition(i, playerObject.transform.position);
             }
-
         }
-    
-    }
-       
-    public int GetPlayerCount() {
-        return playersList.Count;
-    }
-    public GameObject GetPlayer(int jerseyNumber) {
-        if (jerseyNumberToIndexMap.TryGetValue(jerseyNumber, out int playerIndex)) {
-            // Verifica se o índice está dentro do intervalo da lista
-            if (playerIndex >= 0 && playerIndex < playersList.Count) {
-                return playersList[playerIndex];
-            }
-        }
-        Debug.LogError($"Jogador com o jerseyNumber {jerseyNumber} não encontrado.");
-        return null;
-    }
-
-    public Vector3 GetPlayerTrasnformFromId(int playerId) {
-        Debug.Log(playerId);
-        return playersList[playerId].transform.position;
-    }
-
-    public Quaternion GetPlayerRotationFromId(int playerId) {
-        Debug.Log(playerId);
-        return playersList[playerId].transform.rotation;
     }
 
     void UpdateCameras(GameObject playerObject, Person personData) {
@@ -359,19 +338,36 @@ public class JSONReader : MonoBehaviour {
             Debug.LogError("Invalid playerObject name: " + playerObject.name);
             return null;
         }
-        if (!int.TryParse(splitName[1], out int jerseyNumber)) {
+        if (!int.TryParse(splitName[1], out int newId)) {
             Debug.LogError("Invalid jerseyNumber in playerObject name: " + playerObject.name);
             return null;
         }
 
-        // Busca pela lista de pessoas no frame especificado pelo JerseyNumber
-        Person personData = peopleFramesList[frameIndex].FirstOrDefault(person => person.jerseyNumber == jerseyNumber);
-
-        if (personData == null) {
-            Debug.LogError("Person data not found for jerseyNumber: " + jerseyNumber);
-        }
+        // Busca pela lista de pessoas no frame especificado pelo newId
+        Person personData = peopleFramesList[frameIndex].FirstOrDefault(person => person.newId == newId);
 
         return personData;
+
+    }
+
+    public void PoupulatePathRender(GameObject playerObject, int frame) {
+
+        Tracer playerTracer = playerObject.transform.Find("PathRenderer").GetComponentInChildren<Tracer>();
+        playerTracer.ClearLineRenderer();
+        if ((frame - 720) < 0) {
+            for(int i = 0; i <= frame; i++) {
+                Person personData = GetPersonFromPlayerObject(playerObject, i);
+                Vector3 position = new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]);
+                playerTracer.AddVector3ToLineRenderer(position);
+            }
+        } else {
+            for (int i = frame - 720; i <= frame; i++) {
+                Person personData = GetPersonFromPlayerObject(playerObject, i);
+                Vector3 position = new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]);
+                playerTracer.AddVector3ToLineRenderer(position);
+            }
+        }
+
     }
 
     public void UpdateShirtNumberRotation(Transform user) {
@@ -418,7 +414,7 @@ public class JSONReader : MonoBehaviour {
         return closestLimb; // Retorna o limb mais atrasado com base no teamId
     }
 
-
+    
     public GameObject offsideLineTeam0;
     public GameObject offsideLineTeam1;
 
@@ -435,9 +431,9 @@ public class JSONReader : MonoBehaviour {
             Vector3 playerPosition = new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]);
 
             if (personData.teamId == 0)
-                teamPlayers0.Add((personData.jerseyNumber, personData));
+                teamPlayers0.Add(((personData.teamId + personData.jerseyNumber), personData));
             else if (personData.teamId == 1)
-                teamPlayers1.Add((personData.jerseyNumber, personData));
+                teamPlayers1.Add(((personData.teamId + personData.jerseyNumber), personData));
         }
 
         // 2. Ordenar as listas pela posição X do centro de massa
@@ -503,8 +499,10 @@ public class JSONReader : MonoBehaviour {
 
         if(playerObject is not null || playerObject.name is not "Stadium" || playerObject.transform.parent.name is not "Stadium"){
             for(int i = 0; i <= totalFrames - HeatMapStrideValue; i += HeatMapStrideValue){
+                
                 Person personData = GetPersonFromPlayerObject(playerObject, i);
-                grid.AddValue(new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]), 5, 2, 5);
+                if(personData != null)
+                    grid.AddValue(new Vector3(personData.centerOfMass[0], personData.centerOfMass[2], personData.centerOfMass[1]), 5, 2, 5);
             }
         }
     }

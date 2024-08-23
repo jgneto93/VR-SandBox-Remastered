@@ -26,6 +26,7 @@ public class Person {
     public int teamId;
     public int trackId;
     public Camera camera;
+    public int newId;
 }
 
 [Serializable]

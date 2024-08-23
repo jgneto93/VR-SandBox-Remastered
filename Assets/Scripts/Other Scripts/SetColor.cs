@@ -15,7 +15,7 @@ public class SetColor{
         SetObjectColor(objRenderer, color);
     }
 
-    public Color GetColor(int roleId, int teamId, int? playerIndex = null) {
+    public Color GetColor(int teamId,  int? roleId = 1,  int? playerIndex = null) {
         // Initialize baseColor to a default value
         Color baseColor = Color.white;
 

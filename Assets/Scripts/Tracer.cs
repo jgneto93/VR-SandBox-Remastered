@@ -30,4 +30,7 @@ public class Tracer : MonoBehaviour {
             lineRenderer.SetPosition(lineRenderer.positionCount - 1, coord);
         }
     }
+    public void ClearLineRenderer() {
+        lineRenderer.positionCount = 0;
+    }
 }
