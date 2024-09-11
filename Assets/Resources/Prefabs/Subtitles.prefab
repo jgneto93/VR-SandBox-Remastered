@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5879170268833050695}
   - component: {fileID: 4092106040074325952}
   m_Layer: 5
-  m_Name: Text
+  m_Name: SubtitlesText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -146,7 +146,7 @@ GameObject:
   - component: {fileID: 3639383561243712621}
   - component: {fileID: 9148556536412110842}
   m_Layer: 5
-  m_Name: Background
+  m_Name: SubtitlesBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

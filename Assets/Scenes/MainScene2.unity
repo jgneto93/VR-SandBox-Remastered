@@ -2433,7 +2433,7 @@ MonoBehaviour:
   HmdRotatesY: 1
   GravityModifier: 0.379
   useProfileData: 1
-  EnableLinearMovement: 1
+  EnableLinearMovement: 0
   EnableRotation: 1
   RotationEitherThumbstick: 0
 --- !u!143 &1866767500
@@ -3104,6 +3104,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 200
       objectReference: {fileID: 0}
+    - target: {fileID: 2255749197718732749, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 4092106040074325952, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_text
       value: 
@@ -3132,6 +3136,10 @@ PrefabInstance:
       propertyPath: m_fontColor32.rgba
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: 6869637454990329325, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_Name
+      value: SubtitlesText
+      objectReference: {fileID: 0}
     - target: {fileID: 7993950164807409862, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_SizeDelta.x
       value: 400
@@ -3139,6 +3147,14 @@ PrefabInstance:
     - target: {fileID: 7993950164807409862, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_SizeDelta.y
       value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443762983295525815, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_Name
+      value: SubtitlesBackground
+      objectReference: {fileID: 0}
+    - target: {fileID: 8443762983295525815, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8720498143912555837, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_PresetInfoIsWorld
@@ -3154,7 +3170,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9148556536412110842, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_Color.a
-      value: 0.9137255
+      value: 0.8235294
+      objectReference: {fileID: 0}
+    - target: {fileID: 9148556536412110842, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9148556536412110842, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9148556536412110842, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

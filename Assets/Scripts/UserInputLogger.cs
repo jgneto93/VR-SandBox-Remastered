@@ -4,17 +4,19 @@ using UnityEngine;
 
 public class UserInputLogger : MonoBehaviour {
     private string logFilePath;
+    private string lastMessage = "";
     public UserInputLogger() {
         CreateNewTestLogFile();
     }
-    public void LogUserInput(string userInput) {
-        string logEntry = $"{Time.time}: {userInput}";
-        File.AppendAllText(logFilePath, logEntry + "\n");
-    }
+ 
     public void LogCustomLine(string line) {
-        string logEntry = $"{Time.time}: {line}";
-        File.AppendAllText(logFilePath, logEntry + "\n");
+        if(lastMessage != line && line != "") {
+            string logEntry = $"{Time.time}: {line.Replace("\n", " ")}";
+            File.AppendAllText(logFilePath, logEntry + "\n");
+            lastMessage = line;
+        }
     }
+
     public void CreateNewTestLogFile() {
         try {
             // Conta todos os arquivos na pasta

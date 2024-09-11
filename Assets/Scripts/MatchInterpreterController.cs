@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 
 public class MatchInterpreterController : MonoBehaviour {
     public JSONReader jsonReader; // Reference to the JSONReader script
@@ -22,6 +23,7 @@ public class MatchInterpreterController : MonoBehaviour {
     private GameObject oculusInteractionSampleRig;
     private GameObject centerEye;
     private GameObject subtitles;
+
     private UserMovementLogger uML;
     private UserInputLogger uIL;
     private float timeSinceLastLog = 0f; // Variável para acumular o tempo
@@ -56,6 +58,7 @@ public class MatchInterpreterController : MonoBehaviour {
     private bool LAmovDirectionN = false, LAmovDirectionS = false, LAmovDirectionL = false, LAmovDirectionO = false;
     private bool rotationTest = false;
     GameObject cameraRig;
+    Canvas canvas;
 
     private int[] frameNumbers = {
         1123, 640, 9336, 9066, 3589,
@@ -82,13 +85,15 @@ public class MatchInterpreterController : MonoBehaviour {
         laserLineRenderer.positionCount = 2; // Set the number of positions in the line
         oculusInteractionSampleRig = GameObject.Find("OculusInteractionSampleRig");
         lrList = jsonReader.GetLineRendererFromPlayerList();
+        lrList.Add(GameObject.Find("BallPrefab").transform.GetComponentInChildren<LineRenderer>());
         playerController = oculusInteractionSampleRig.GetComponent<OVRPlayerController>();
         cameraRig = GameObject.Find("OVRCameraRig");
         centerEye = GameObject.Find("CenterEyeAnchor");
         subtitles = GameObject.Find("Subtitles");
-        subtitles.SetActive(false);
         uML = new();
         uIL = new();
+        canvas = GameObject.Find("Subtitles").GetComponent<Canvas>();
+        HideTestMessage();
     }
 
     void setTutorialonRightHand() {
@@ -99,9 +104,9 @@ public class MatchInterpreterController : MonoBehaviour {
 
     void PauseUnpause() {
         if (!isPaused) {
-            uIL.LogCustomLine("Pausado");
+            uIL.LogCustomLine("A-Pause");
         } else
-            uIL.LogCustomLine("DesPausado");
+            uIL.LogCustomLine("A-Resume");
 
         jsonReader.TogglePlay();
         isPaused = !isPaused;
@@ -113,35 +118,43 @@ public class MatchInterpreterController : MonoBehaviour {
 
     }
 
+    void LogMovement() {
+        if (timeSinceLastLog >= .5f) {
+            uML.LogMovement(centerEye.transform);
+            timeSinceLastLog = 0f; // Reseta o acumulador de tempo
+        }
+    }
+
     void Update() {
         currentFrame = jsonReader.GetFrameIndex();
-
+        
         timeSinceLastLog += Time.deltaTime;
         timeSinceLineInteraction += Time.deltaTime;
 
+        LogMovement();
+
+        
         if (actualPlayingTest != 0) {
             if (actualPlayingTest == 1) {
-                if(testSetup == false) {
+                if (testSetup == false) {
                     if (!isPaused) 
                         PauseUnpause();
                     ShowTestMessages();
-                   
+                    isShowingTestMessages = true;
                     if (allMessagesHasBeenShown) {
                         rotationTest = false;
-                        HideTestMessage();
-                        testStarted = true;
                         ResetMovementBooleans();
                         testSetup = true;
+                        testStarted = true;
                     }
                 }
+
                 if (testStarted == true && testFinished == false) {
-                    HideTestMessage();
                     if (!rotationTest) {
                         ShowTestMessage($"{(LAmovDirectionS == false ? "Mova-se para Trás\n" : "")}" +
                             $"{(LAmovDirectionL == false ? "Mova-se para Direita\n" : "")}" +
                             $"{(LAmovDirectionN == false ? "Mova-se para Frente\n" : "")}" +
                             $"{(LAmovDirectionO == false ? "Mova-se para Esquerda\n" : "")}");
-                        
                         if (LAmovDirectionS && LAmovDirectionO && LAmovDirectionN && LAmovDirectionL) {
                             rotationTest = true;
                             ResetMovementBooleans();
@@ -149,14 +162,11 @@ public class MatchInterpreterController : MonoBehaviour {
                     }
                     if (rotationTest) {
                         ShowTestMessage($"{(LAmovDirectionL == false ? "Rotacione-se para Direita\n" : "")}" +
-                            $"{(LAmovDirectionO == false ? "Rotacione-se para Esquerda\n" : "")}");
-                        
+                                        $"{(LAmovDirectionO == false ? "Rotacione-se para Esquerda\n" : "")}");
                         if (LAmovDirectionO && LAmovDirectionL) {
                             ShowTestMessage($"Treinamento de movimentação finalizado\n" +
                                             "--Quando Preparado Pressione A--");
-                            if (OVRInput.GetDown(OVRInput.Button.One)) {
-                                testFinished = true;
-                            }
+                            testFinished = true;
                         }
                     }
                 }
@@ -173,61 +183,57 @@ public class MatchInterpreterController : MonoBehaviour {
                     oculusInteractionSampleRig.transform.position = new Vector3(0, 1, -40); // Canto da linha do meio campo
                     jsonReader.SetFrameIndex(10);
                     ShowTestMessages();
-                    currentTestMessages += 1;
                     isShowingTestMessages = true;
-                    if (!isPaused)
-                        PauseUnpause();
 
-                    if (allMessagesHasBeenShown) { 
-                        testStarted = true;
+                    if (allMessagesHasBeenShown) {
                         testSetup = true;
+                        testStarted = true;
                         playerController.enabled = true;
                     }
                 }
                 if (testStarted && testSetup) {
                     if (isPaused)
                         PauseUnpause();
-                    if (oculusInteractionSampleRig.transform.position.y >= 30) {
+                    if (oculusInteractionSampleRig.transform.position.z >= 30) {
                         testFinished = true;
                     }
                 }
                 if (testFinished) {
                     if (!isPaused)
                         PauseUnpause();
-
+                    NextTest();
                 }
             }
-
             if (actualPlayingTest == 3) {
                 if (testSetup == false) {
-                    if (!isPaused)
-                        PauseUnpause();
-                    uIL.LogCustomLine($"Teste {currentTest1} do {actualPlayingTest} Iniciado");
-                    uML.LogCustomLine($"Teste {currentTest1} do {actualPlayingTest} Iniciado");
+                    
                     jsonReader.SetFrameIndex(frameNumbers[currentTest1] - 155);
                     testSetup = true;
                     referencia = GameObject.Find(playerObjects[currentTest1]).GetComponentInChildren<Camera>().gameObject;
                     referenciaName = GameObject.Find(playerObjects[currentTest1]).gameObject.name;
                     setCameraOnHead = true;
                     SetCameraToPlayer(playerController, referencia);
-                    if (!isPaused)
-                        PauseUnpause();
+                    
                     ShowTestMessage($"Teste {currentTest1} de {totalTests1} Iniciado\n" +
                                     $"Atenção\n" +
-                                    "\n--Pressione A--");
+                                    "-Pressione A--");
                 }
-                if (testSetup && currentFrame < frameNumbers[currentTest1] - 150) {
+                if (testSetup && currentFrame < frameNumbers[currentTest1] - 150 && !testStarted) {
+                    if (!isPaused) {
+                        HideTestMessage();
+                        PauseUnpause();
+                    }
                     testStarted = true;
                 }
                 if (currentFrame >= (frameNumbers[currentTest1] - 3) && currentFrame <= (frameNumbers[currentTest1] + 3) && !testFinished) {
                     if (!isPaused) {
-                        PauseUnpause();
                         HideTestMessage();
+                        PauseUnpause();
                     }
                     ShowTestMessages();
-                    currentTestMessages += 1;
                     isShowingTestMessages = true;
                     if (allMessagesHasBeenShown && isPaused) {
+                        HideTestMessage();
                         PauseUnpause();
                     }
                     testFinished = true;
@@ -245,18 +251,16 @@ public class MatchInterpreterController : MonoBehaviour {
                     setCameraOnHead = true;
                     SetCameraToPlayer(playerController, referencia);
                     isSlowMotion = true;
-                    HideTestMessage();
                     ShowTestMessage("Teste 2 (Movimentação) Iniciado\nPressione A para continuar...");
                     testSetup = true;
 
                 } else if (currentFrame >= 966 && testStarted == false) {
+                    HideTestMessage();
                     if (!isPaused) {
                         PauseUnpause();
-                        HideTestMessage();
                         //GameObject.Find("playerObject 5124").SetActive(false);
                     }
                     ShowTestMessages();
-                    currentTestMessages += 1;
                     isShowingTestMessages = true;
                     if (allMessagesHasBeenShown && isPaused) {
                         PauseUnpause();
@@ -276,7 +280,7 @@ public class MatchInterpreterController : MonoBehaviour {
                 } else if (jsonReader.GetFrameIndex() >= 1100 && testFinished == false) {
                     testFinished = true;
                     if (!isPaused) {
-                        GameObject.Find("playerObject 5124").SetActive(true);
+                        //GameObject.Find("playerObject 5124").SetActive(true);
                         PauseUnpause();
                         ShowTestMessage("Teste 2 Concluído\nPressione A para ver\no prosseguimento da jogada...");
                     }
@@ -290,12 +294,6 @@ public class MatchInterpreterController : MonoBehaviour {
             uIL.LogCustomLine($"Tutorial {isTutorialActive}");
             isTutorialActive = !isTutorialActive;
             tutorial.SetActive(isTutorialActive);
-        }
-
-        // Verifica se um segundo se passou
-        if (timeSinceLastLog >= .5f) {
-            uML.LogMovement(centerEye.transform);
-            timeSinceLastLog = 0f; // Reseta o acumulador de tempo
         }
 
         if (playerController.enabled is false && setCameraOnHead == true) {
@@ -350,15 +348,13 @@ public class MatchInterpreterController : MonoBehaviour {
 
 
         if (OVRInput.GetDown(OVRInput.Button.One)) { // Pausa ou despausa a cena
-            if (actualPlayingTest != 0 && !allMessagesHasBeenShown && isShowingTestMessages) {
-                HideTestMessage();
+            if (actualPlayingTest != 0 && isShowingTestMessages) {
                 ShowTestMessages();
                 currentTestMessages += 1;
             } else {
                 PauseUnpause();
             }
         }
-
 
         if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger)) {
             if (timeSinceLineInteraction >= .175f) {
@@ -378,6 +374,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         if (tracer != null) {
                             LineRenderer lineRenderer = tracer.GetComponent<LineRenderer>();
                             if (lineRenderer != null) {
+
                                 if (lastLinerenderer is null) {
                                     lastLinerenderer = lineRenderer;
                                 }
@@ -395,13 +392,17 @@ public class MatchInterpreterController : MonoBehaviour {
                                         jsonReader.PoupulatePathRender(parent.gameObject, currentFrame);
                                 }
                                 lastLinerenderer = lineRenderer;
-
-                                if (!setCameraOnHead) {
-                                    uIL.LogUserInput($"Path do Jogador {referenciaName} Ativado");
+                                if (actualPlayingTest != 0) {
+                                    uIL.LogCustomLine($"Jogador {parent.transform.name} Selecionado");
+                                }
+                                if (!setCameraOnHead && actualPlayingTest == 0) {
+                                    uIL.LogCustomLine($"Path do Jogador {parent.transform.name} Ativado");
+                                } else if (actualPlayingTest == 0) {
+                                    uIL.LogCustomLine($"Visão Alternada Para {parent.transform.name}");
                                 }
                             }
                         }
-                        if (parent.GetComponentInChildren<Camera>().gameObject != null && hit.transform.parent.name is not "BallPrefab" && hit.transform.parent.name is not "Stadium") {
+                        if (hit.transform.name is not "BallPrefab" && hit.transform.parent.name is not "Stadium") {
                             if (OVRInput.GetDown(OVRInput.Button.Four)) {
                                 setCameraOnHead = true;
                                 timeSinceLineInteraction = 0f; // Reseta o acumulador de tempo
@@ -409,14 +410,14 @@ public class MatchInterpreterController : MonoBehaviour {
                             }
                         }
                     }
+                    if (hit.transform.name is "BallPrefab") { 
+                        LineRenderer balllineRenderer = hit.transform.GetComponentInChildren<LineRenderer>();
+                        if (balllineRenderer != null) {
+                            balllineRenderer.enabled = !balllineRenderer.enabled;
+                            uIL.LogCustomLine("Path da Bola Ativado");
 
-                    Tracer balllineRenderer = parent.GetComponentInChildren<Tracer>();
-                    if (balllineRenderer != null) {
-                        balllineRenderer.enabled = !balllineRenderer.enabled;
-                        uIL.LogUserInput("Path da Bola Ativado");
-
+                        }
                     }
-
                 } else {
                     laserLineRenderer.SetPosition(1, ray.GetPoint(100)); // Set the end position of the laser line to a point far away
                     jsonReader.SetPlayerHeatMap(null, true);
@@ -430,19 +431,19 @@ public class MatchInterpreterController : MonoBehaviour {
         if (OVRInput.GetDown(OVRInput.Button.Three)) {
             if (isSlowMotion) {
                 Time.timeScale = 1f; // restore normal speed
-                uIL.LogUserInput("Slow Motion Off");
+                uIL.LogCustomLine("Slow Motion Off");
 
                 isSlowMotion = false;
             } else {
                 Time.timeScale = 0.33f; // slow down to 50% speed
-                uIL.LogUserInput("Slow Motion On");
+                uIL.LogCustomLine("Slow Motion On");
 
                 isSlowMotion = true;
             }
         }
 
         if (OVRInput.GetDown(OVRInput.Button.Four)) { // desativa todos os tracers
-            uIL.LogUserInput("Paths Desativados por Comando");
+            uIL.LogCustomLine("Paths Desativados por Comando");
             foreach (LineRenderer lr in lrList) {
                 lr.enabled = false;
             }
@@ -458,10 +459,10 @@ public class MatchInterpreterController : MonoBehaviour {
             CharacterController cc = parent.GetComponent<CharacterController>();
             cc.enabled = false;
             if (isOnField) {
-                uIL.LogUserInput("TP Campo");
+                uIL.LogCustomLine("TP Campo");
                 cameraRig.transform.parent.position = new Vector3(0, 1, 0);
             } else {
-                uIL.LogUserInput("TP Arquibancada");
+                uIL.LogCustomLine("TP Arquibancada");
                 cameraRig.transform.parent.position = new Vector3(0, 17, -53);
             }
             cc.enabled = true;
@@ -487,8 +488,8 @@ public class MatchInterpreterController : MonoBehaviour {
         if (referencia is not null) {
             
             if(setCameraOnHead == false) {
-                uIL.LogUserInput($"Vendo o Ponto de Vista do Jogador {referenciaName}");
-                uIL.LogUserInput("Saiu da Visão do Jogador");
+                uIL.LogCustomLine($"Vendo o Ponto de Vista do Jogador {referenciaName}");
+                uIL.LogCustomLine("Saiu da Visão do Jogador");
                 playerController.enabled = true;
                 setCameraOnHead = false;
                 return;
@@ -510,8 +511,8 @@ public class MatchInterpreterController : MonoBehaviour {
                     oculusInteractionSampleRig.transform.Rotate(0, -10, 0);
                 }
             } else if (OVRInput.Get(OVRInput.Button.Start) || setCameraOnHead == false) {
-                uIL.LogUserInput($"Vendo o Ponto de Vista do Jogador {referenciaName}");
-                uIL.LogUserInput("Saiu da Visão do Jogador");
+                uIL.LogCustomLine($"Vendo o Ponto de Vista do Jogador {referenciaName}");
+                uIL.LogCustomLine("Saiu da Visão do Jogador");
                 playerController.enabled = true;
                 setCameraOnHead = false;
                 return;
@@ -520,7 +521,6 @@ public class MatchInterpreterController : MonoBehaviour {
     }
 
     void NextTest() {
-        HideTestMessage();
         if(actualPlayingTest == 1) {
             uIL.LogCustomLine("Pré-Treino de Movimentação Concluído");
             uML.LogCustomLine("Pré-Treino de Movimentação Concluído");
@@ -538,8 +538,8 @@ public class MatchInterpreterController : MonoBehaviour {
 
         }
         else if (actualPlayingTest == 3) { //OLHA O ELSE IF...
-            uML.LogCustomLine($"Teste Tomada Decisão {currentTest1} Finalizado");
-            uIL.LogCustomLine($"Teste Tomada Decisão {currentTest1} Finalizado");
+            uML.LogCustomLine($"Cenário Tomada Decisão {currentTest1} Finalizado");
+            uIL.LogCustomLine($"Cenário Tomada Decisão {currentTest1} Finalizado");
             currentTest1 += 1;
             isShowingTestMessages = false;
 
@@ -556,6 +556,7 @@ public class MatchInterpreterController : MonoBehaviour {
 
         } else if(actualPlayingTest > totalPlayingTest) {
             EndTests();
+            actualPlayingTest = 1;
         }
         
     }
@@ -581,45 +582,48 @@ public class MatchInterpreterController : MonoBehaviour {
         playerController.enabled = true;
         ResetBooleans();
         currentTest1 = 0;
-        uML.LogCustomLine("Todos os Testes Finalizados");
-        uIL.LogCustomLine("Todos os Testes Finalizados");
-        uML.CreateNewTestLogFile();
-        uIL.CreateNewTestLogFile();
     }
 
     void EndTests() {
         HideTestMessage();
         ResetTest();
+        uML.LogCustomLine("Todos os Testes Finalizados");
+        uIL.LogCustomLine("Todos os Testes Finalizados");
+        uML.CreateNewTestLogFile();
+        uIL.CreateNewTestLogFile();
         actualPlayingTest = 0;
+
     }
 
     void ShowTestMessage(string message) {
-        subtitles.SetActive(true);
-        Transform textTransform = subtitles.transform.Find("Text");
+        ActivateTestMessage();
+        Transform textTransform = subtitles.transform.Find("SubtitlesText");
         TextMeshProUGUI textMesh = textTransform.GetComponent<TextMeshProUGUI>();
 
         textMesh.text = message;
-        uIL.LogCustomLine(message);
+
+        
+        uIL.LogCustomLine(message.Replace("\n", " "));
     }
 
     private string[][] passDecisionTestMessages = new string[][]{
         new string[] { // pre testes (movimentação 1)
             "Para ver o menu dos controles\nOlhe nas arquibancadas\nOu pressione B",
-            "Utilize o LA para movimentar\ne o RA para rotacionar"
+            "Utilize o LA para movimentar",
+            "Utilize o RA para rotacionar"
         },
         new string[] { // pre testes (movimentação 2)
             "Você deverá se movimentar pela linha do meio campo\nOlhando para a bola",
             "É muito importante que você acompanhe a bola\ne não a perca de visa"
         },
         new string[]{ // teste 1
-            "Qual é o seu Time",
             "Quem tocou a bola para você",
             "O que opções de jogada você tem",
             "Qual seria sua escolha nesse lance?\n(Passe,Drible,Chute...)"
         },
         new string[]{ // teste 2
             "A partir de agora você assumirá\n o controle desse jogador",
-            "Ele é um volnte\n do time vermelho",
+            "Ele é um volante\n do time vermelho",
             "Mova-se e posicione-se\n como se fosse você jogando",
             "Após pressionar A, a jogada continuará"
         }
@@ -629,51 +633,50 @@ public class MatchInterpreterController : MonoBehaviour {
 
     void ShowTestMessages() {
         
-        isShowingTestMessages = true;
         ActivateTestMessage();
 
         if (currentTestMessages == passDecisionTestMessages[actualPlayingTest -1].Length) { 
             allMessagesHasBeenShown = true;
             isShowingTestMessages = false;
-            PauseUnpause();
+            currentTestMessages = 0;
+            HideTestMessage();
         } //OLHA O ELSE IF...
+
         else {
             if(actualPlayingTest == 1) {
                 ShowTestMessage("Treinamento de Movimentação\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
-                    $"\n-- Pressione A para continuar --");
+                    $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }//OLHA O ELSE IF...
             else if (actualPlayingTest == 2) {
-                ShowTestMessage("Treinamento de Movimetnação\nOlhando para a bola\n" +
+                ShowTestMessage("Treinamento de Movimentação\nOlhando para a bola\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
-                    $"\n-- Pressione A para contunuar --");
+                    $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }
             else if (actualPlayingTest == 3) { 
-                ShowTestMessage($"Teste {currentTest1 + 1} de {totalTests1}\n" +
+                ShowTestMessage($"Cenário {currentTest1 + 1} de {totalTests1}\n" +
                 $"Responda em Voz Alta\n" +
-                $"{passDecisionTestMessages[actualPlayingTest -1][currentTestMessages]}" +
-                $"\n-- Pressione A para continuar --");
+                $"{passDecisionTestMessages[actualPlayingTest -1][currentTestMessages]}\n" +
+                $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }//OLHA O ELSE IF...
             else if(actualPlayingTest == 4) {
                 ShowTestMessage($"Teste 2: Movimentação\n" +
-                    $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}" +
-                    $"\n-- Pressione A para continuar --");
+                    $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
+                    $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }
         }
-        currentTestMessages += 1;
-
     }
     void ActivateTestMessage() {
-
-        subtitles.SetActive(true);
+        canvas.enabled = true;
     }
     void HideTestMessage() {
+        
+        canvas.enabled = false;
 
-       // subtitles.SetActive(false);
     }
 
 }

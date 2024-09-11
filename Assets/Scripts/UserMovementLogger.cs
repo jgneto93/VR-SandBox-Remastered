@@ -4,19 +4,26 @@ using UnityEngine;
 
 public class UserMovementLogger : MonoBehaviour {
     private string logFilePath;
+    private string lastLog = "";
+    private Transform lastTransform;
     public UserMovementLogger() {
         CreateNewTestLogFile();
     }
 
     public void LogMovement(Transform transform) {
-        string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
-        File.AppendAllText(logFilePath, logEntry + "\n");
-
+        if(lastTransform != transform) { 
+            string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
+            File.AppendAllText(logFilePath, logEntry + "\n");
+            lastTransform = transform;
+        }
     }
 
     public void LogCustomLine(string line) {
-        string logEntry = $"{Time.time}: {line}";
-        File.AppendAllText(logFilePath, logEntry + "\n");
+        if(lastLog != line && line != "") {
+            string logEntry = $"{Time.time}: {line.Replace("\n", " ")}";
+            File.AppendAllText(logFilePath, logEntry + "\n");
+            lastLog = line;
+        }
     }
 
     public void CreateNewTestLogFile() {

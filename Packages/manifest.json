@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.meta.xr.simulator": "file:D:/GitHub/package",
     "com.unity.collab-proxy": "2.1.0",
     "com.unity.feature.development": "1.0.1",
     "com.unity.nuget.newtonsoft-json": "3.0.2",
