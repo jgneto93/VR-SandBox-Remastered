@@ -1312,7 +1312,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1024925868
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1355,7 +1355,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0e9d721b6bb24a74491e8350eacf908c, type: 2}
+  - {fileID: 2100000, guid: 4bc9ccff94ebf474795076123a415513, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1461,7 +1461,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0e9d721b6bb24a74491e8350eacf908c, type: 2}
+  - {fileID: 2100000, guid: 5f1887913f7c0a04aa687db83c65b0be, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2420,7 +2420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0950df82e7936c84983497630bde5b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 0.9
+  Acceleration: 1
   Damping: 1.5
   BackAndSideDampen: 1
   JumpForce: 0.3
@@ -2433,7 +2433,7 @@ MonoBehaviour:
   HmdRotatesY: 1
   GravityModifier: 0.379
   useProfileData: 1
-  EnableLinearMovement: 0
+  EnableLinearMovement: 1
   EnableRotation: 1
   RotationEitherThumbstick: 0
 --- !u!143 &1866767500
