@@ -6,20 +6,30 @@ public class UserMovementLogger : MonoBehaviour {
     private string logFilePath;
     private string lastLog = "";
     private Transform lastTransform;
+    private Vector3 lastPosition;
+    private Quaternion lastRotation;
+    private const float positionThreshold = 0.01f; // Limiar para mudanças de posição
+    private const float rotationThreshold = 0.01f; // Limiar para mudanças de rotação
+
     public UserMovementLogger() {
         CreateNewTestLogFile();
     }
 
     public void LogMovement(Transform transform) {
-        if(lastTransform != transform) { 
+        if (lastTransform != transform ||
+            Vector3.Distance(lastPosition, transform.position) > positionThreshold ||
+            Quaternion.Angle(lastRotation, transform.rotation) > rotationThreshold) {
+
             string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
             File.AppendAllText(logFilePath, logEntry + "\n");
             lastTransform = transform;
+            lastPosition = transform.position;
+            lastRotation = transform.rotation;
         }
     }
 
     public void LogCustomLine(string line) {
-        if(lastLog != line && line != "") {
+        if (lastLog != line && line != "") {
             string logEntry = $"{Time.time}: {line.Replace("\n", " ")}";
             File.AppendAllText(logFilePath, logEntry + "\n");
             lastLog = line;

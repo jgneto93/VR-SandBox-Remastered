@@ -26,7 +26,10 @@ public class MatchInterpreterController : MonoBehaviour {
 
     private UserMovementLogger uML;
     private UserInputLogger uIL;
-    private float timeSinceLastLog = 0f; // Variável para acumular o tempo
+
+    private float logInterval = 0.25f; // Intervalo de 0.25 segundos (4 vezes por segundo)
+    private float timeSinceLastLog = 0f;
+
     private float timeSinceLineInteraction = 0f; // Variável para acumular o tempo
 
     private LineRenderer lastLinerenderer = null;
@@ -121,20 +124,21 @@ public class MatchInterpreterController : MonoBehaviour {
     }
 
     void LogMovement() {
-        if (timeSinceLastLog >= .5f) {
-            uML.LogMovement(centerEye.transform);
-            timeSinceLastLog = 0f; // Reseta o acumulador de tempo
-        }
+        uML.LogMovement(centerEye.transform);
     }
 
     void Update() {
         currentFrame = jsonReader.GetFrameIndex();
         
-        timeSinceLastLog += Time.deltaTime;
         timeSinceLineInteraction += Time.deltaTime;
+        timeSinceLastLog += Time.deltaTime;
 
-        LogMovement();
-        
+        // Verifica se o intervalo de log foi atingido
+        if (timeSinceLastLog >= logInterval) {
+            LogMovement();
+            timeSinceLastLog = 0f; // Reseta o temporizador
+        }
+
         if (actualPlayingTest != 0) {
             if (actualPlayingTest == 1) {
                 if (testSetup == false) {
