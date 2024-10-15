@@ -43,12 +43,15 @@ public class MatchInterpreterController : MonoBehaviour {
     OVRPlayerController playerController;
 
     private int currentTest1 = 0;
-    private int totalTests1 = 3;
+    private int totalTests1 = 10;
 
     private bool allMessagesHasBeenShown = false;
     private bool isShowingTestMessages = false;
+    private bool isShowingAMessage = false;
+    
+    public GameObject selectionMarkerPrefab;
+    private List<GameObject> selectionmarkers = new(); 
 
-    //private bool actualPlayingTest = false;
     private int actualPlayingTest = 0;
     private int totalPlayingTest = 6;
 
@@ -65,6 +68,8 @@ public class MatchInterpreterController : MonoBehaviour {
 
     private float inicialTime;
 
+    private GameObject playerObject;
+
     private int[] frameNumbers = {
         1123, 640, 9336, 9066, 3589,
         7490, 7038,  6879, 4492,2250
@@ -75,6 +80,34 @@ public class MatchInterpreterController : MonoBehaviour {
         "playerObject 3120", "playerObject 5124", "playerObject 16126", "playerObject 5124",  "playerObject 3120"
     };
 
+    void InstantiateSelectionMarker(GameObject target) {
+        bool markerExists = false;
+        // Verifica se já existe um marcador para o objeto alvo
+        for (int i = 0; i < selectionmarkers.Count; i++) {
+            if (selectionmarkers[i].transform.parent == target.transform) {
+                Destroy(selectionmarkers[i]);
+                selectionmarkers.RemoveAt(i);
+                markerExists = true;
+                break; // Remove apenas o primeiro marcador encontrado
+            }
+        }
+        // Se não houver marcador, adicione um novo
+        if (!markerExists && selectionMarkerPrefab != null) {
+            Vector3 markerPosition = jsonReader.GetCenterOfMassFromPlayerObject(target) + Vector3.up * 1.1f;
+            GameObject marker = Instantiate(selectionMarkerPrefab, markerPosition, Quaternion.identity);
+            marker.transform.SetParent(target.transform);
+            selectionmarkers.Add(marker);
+            uIL.LogCustomLine(2, $"Jogador Selecionado Para o Teste: {target.transform.name}");
+        } else if (selectionMarkerPrefab == null) {
+            Debug.LogWarning("Prefab de indicador visual não atribuído.");
+        }
+    }
+    void RemoveAllSelectionMarkers() {
+        foreach (GameObject marker in selectionmarkers) {
+            Destroy(marker);
+        }
+        selectionmarkers.Clear();
+    }
 
     void Start() {
         rightController = GameObject.Find("OVRCameraRig/TrackingSpace/RightHandAnchor").transform;
@@ -99,6 +132,13 @@ public class MatchInterpreterController : MonoBehaviour {
         uIL = new();
         canvas = GameObject.Find("Subtitles").GetComponent<Canvas>();
         HideTestMessage();
+
+        playerObject = GameObject.Find("playerObject 5124");
+        if (playerObject == null) {
+            Debug.LogWarning("playerObject 5124 não encontrado no Start.");
+        } else {
+            Debug.Log("playerObject 5124 encontrado no Start.");
+        }
     }
 
     void setTutorialonRightHand() {
@@ -109,18 +149,29 @@ public class MatchInterpreterController : MonoBehaviour {
 
     void PauseUnpause() {
         if (!isPaused) {
-            uIL.LogCustomLine("A-Pause");
+            uIL.LogCustomLine(2, "A-Pause");
         } else
-            uIL.LogCustomLine("A-Resume");
+            uIL.LogCustomLine(2, "A-Resume");
 
         jsonReader.TogglePlay();
         isPaused = !isPaused;
     }
-    void EnablePlayerAfterTest() {
-
-    }
     void DisablePlayerForTest() {
+        if (playerObject != null) {
+            playerObject.SetActive(false);
+            Debug.Log("playerObject 5124 desativado.");
+        } else {
+            Debug.LogWarning("playerObject 5124 não encontrado ao desativar.");
+        }
+    }
 
+    void EnablePlayerAfterTest() {
+        if (playerObject != null) {
+            playerObject.SetActive(true);
+            Debug.Log("playerObject 5124 reativado.");
+        } else {
+            Debug.LogWarning("playerObject 5124 não encontrado ao reativar.");
+        }
     }
 
     void LogMovement() {
@@ -130,8 +181,8 @@ public class MatchInterpreterController : MonoBehaviour {
     void Update() {
         currentFrame = jsonReader.GetFrameIndex();
         
-        timeSinceLineInteraction += Time.deltaTime;
-        timeSinceLastLog += Time.deltaTime;
+        timeSinceLineInteraction += Time.unscaledDeltaTime;
+        timeSinceLastLog += Time.unscaledDeltaTime;
 
         // Verifica se o intervalo de log foi atingido
         if (timeSinceLastLog >= logInterval) {
@@ -184,6 +235,7 @@ public class MatchInterpreterController : MonoBehaviour {
                 if (testSetup == false) {
                     playerController.enabled = false;
                     oculusInteractionSampleRig.transform.position = new Vector3(0, 1, -40); // Canto da linha do meio campo
+                    oculusInteractionSampleRig.transform.rotation = new Quaternion(0, 0, 0, 0);
                     jsonReader.SetFrameIndex(10);
                     
                     ShowTestMessages();
@@ -212,39 +264,37 @@ public class MatchInterpreterController : MonoBehaviour {
             }
             if (actualPlayingTest == 3) {
                 if (testSetup == false) {
-                    if (!isPaused)
-                        PauseUnpause();
                     jsonReader.SetFrameIndex(frameNumbers[currentTest1] - 155);
-                    testSetup = true;
                     referencia = GameObject.Find(playerObjects[currentTest1]).GetComponentInChildren<Camera>().gameObject;
                     referenciaName = GameObject.Find(playerObjects[currentTest1]).gameObject.name;
                     setCameraOnHead = true;
                     SetCameraToPlayer(playerController, referencia);
-                    if (!isPaused)
-                        PauseUnpause();
-                    ShowTestMessage($"Teste {currentTest1} de {totalTests1} Iniciado\n" +
-                                    $"Atenção\n" +
-                                    "-Pressione A--");
+                    testSetup = true;
                 }
-                if (testSetup && currentFrame < frameNumbers[currentTest1] - 150 && !testStarted) {
+
+                if (testSetup && !testStarted) {
                     if (!isPaused) {
                         PauseUnpause();
+                        testStarted = true;
+                        ShowTestMessage($"Teste {currentTest1 + 1} de {totalTests1} Iniciado\n" +
+                                $"Atenção\n" +
+                                "--Pressione A--");
                     }
-                    testStarted = true;
                 }
+                
                 if (currentFrame >= (frameNumbers[currentTest1] - 3) && currentFrame <= (frameNumbers[currentTest1] + 3) && !testFinished) {
+                    HideTestMessage();
                     if (!isPaused) {
-                        HideTestMessage();
                         PauseUnpause();
                     }
                     ShowTestMessages();
                     if (allMessagesHasBeenShown && isPaused) {
                         HideTestMessage();
                         PauseUnpause();
+                        testFinished = true;
                     }
-                    testFinished = true;
                 }
-                if (testStarted && currentFrame >= (frameNumbers[currentTest1] + 200)) {
+                if (currentFrame >= (frameNumbers[currentTest1] + 200) && testFinished) {
                     NextTest();
                 }
             } 
@@ -257,14 +307,16 @@ public class MatchInterpreterController : MonoBehaviour {
                     setCameraOnHead = true;
                     SetCameraToPlayer(playerController, referencia);
                     isSlowMotion = true;
-                    ShowTestMessage("Teste 2 (Movimentação) Iniciado\nPressione A para continuar...");
+                    ShowTestMessage("Teste 2 (Movimentação) Iniciado\n" +
+                                     "Você fará o papel de um jogador\n" +
+                                     "Pressione A para continuar e AGUARDE...");
                     testSetup = true;
 
                 } else if (currentFrame >= 966 && testStarted == false) {
                     HideTestMessage();
                     if (!isPaused) {
                         PauseUnpause();
-                        //GameObject.Find("playerObject 5124").SetActive(false);
+                        DisablePlayerForTest();
                     }
                     ShowTestMessages();
                     if (allMessagesHasBeenShown && isPaused) {
@@ -277,17 +329,18 @@ public class MatchInterpreterController : MonoBehaviour {
                         if (playerController.enabled == false) {
                             playerController.enabled = true;
                         }
-                        //GameObject.Find("playerObject 5124").SetActive(false);
                         setCameraOnHead = false;
                         playerController.enabled = true;
                         test2isMoving = true;
                     }
                 } else if (jsonReader.GetFrameIndex() >= 1100 && testFinished == false) {
-                    testFinished = true;
+                    EnablePlayerAfterTest();
+                    ShowTestMessage("Teste 2 Concluído\nPressione A para prosseguir");
                     if (!isPaused) {
-                        //GameObject.Find("playerObject 5124").SetActive(true);
                         PauseUnpause();
-                        ShowTestMessage("Teste 2 Concluído\nPressione A para ver\no prosseguimento da jogada...");
+                    }
+                    if (isPaused) {
+                        testFinished = true;
                     }
                     NextTest();
                 }
@@ -320,7 +373,7 @@ public class MatchInterpreterController : MonoBehaviour {
                             ShowTestMessage("Utilize o LIT + Y para visualizar\no ponto de vista de um jogador");
                         }
                         if (LAmovDirectionL == true && LAmovDirectionO == true && LAmovDirectionN == true && LAmovDirectionS == false) {
-                            ShowTestMessage("Utilize o Botão Start Para Sair da Visão do Jogador\ne Alternar entre a Arquibancada e o Campo");
+                            ShowTestMessage("Alterne entre os pontos de vistas\ndos jogadoresn utilizando o LIT\nUtilize o Botão Start Para Sair da Visão do Jogador\ne Alternar entre a Arquibancada e o Campo");
                         }
                         if (LAmovDirectionL == true && LAmovDirectionO == true && LAmovDirectionN == true && LAmovDirectionS == true) {
                             ResetMovementBooleans();
@@ -333,12 +386,12 @@ public class MatchInterpreterController : MonoBehaviour {
                         }
                         if (LAmovDirectionL == true && LAmovDirectionO == false) {
                             ShowTestMessage("Utilize o botão X para\nAtivar/Desativar a câmera lenta");
-                        }
+                        } 
                         if (LAmovDirectionL == true && LAmovDirectionO == true && LAmovDirectionN == false) {
-                            ShowTestMessage("Utilize o RHT + RA para\nAvançar ou Retroceder o tempo");
+                            ShowTestMessage("Utilize o RHT + RA para\nAvançar ou Retroceder o tempo\nNo meio da sua tela é possível ver a barra de progresso do replay");
                         }
                         if (LAmovDirectionL == true && LAmovDirectionO == true && LAmovDirectionN == true) {
-                            ShowTestMessage("Utilize o botão A para\nPausar/Despausar a cena");
+                            ShowTestMessage("Utilize o botão A para\nPausar / Resumir  a cena");
 
                             testFinished = true;
                         }
@@ -353,7 +406,7 @@ public class MatchInterpreterController : MonoBehaviour {
                 if(testSetup == false) {
                     if (!isPaused)
                         PauseUnpause();
-                    inicialTime = Time.time;
+                    inicialTime = Time.unscaledTime;
                     jsonReader.SetFrameIndex(2200);
                     ShowTestMessage("Teste 3\n Uso Livre da Ferramenta\nPor 2 minutos você estará livre para usar a ferramenta\n da forma que mais te agradar");
                     PauseUnpause();
@@ -361,12 +414,12 @@ public class MatchInterpreterController : MonoBehaviour {
                     testSetup = true;
                 }
                 if (testStarted == true && testFinished == false) {
-                    
-                    if (Time.time - inicialTime > 120.0f)
+                    if (Time.unscaledTime - inicialTime > 120.0f) {
                         testFinished = true;
-                    Debug.Log($"Tempo decorrido: {Time.time - inicialTime}");
+                        ShowTestMessage("Testes Finalizados!\nVocê Pode Retirar o Óculus Agora!");
+                    }
                 }
-                if(testFinished == true) {
+                if(testFinished == true && isShowingAMessage == false) {
                     NextTest();
                 }
             }
@@ -374,7 +427,7 @@ public class MatchInterpreterController : MonoBehaviour {
         
 
         if (OVRInput.GetDown(OVRInput.Button.Two) && !OVRInput.GetDown(OVRInput.Button.Four) && (!OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) || !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))) {
-            uIL.LogCustomLine($"Tutorial {isTutorialActive}");
+            uIL.LogCustomLine(2,$"Tutorial {isTutorialActive}");
             isTutorialActive = !isTutorialActive;
             tutorial.SetActive(isTutorialActive);
         }
@@ -385,14 +438,14 @@ public class MatchInterpreterController : MonoBehaviour {
 
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y > 0.5f) {
             timeline.SetSliderValue(timeline.GetSliderValue() + (int)Math.Round(25 * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y));
-            uIL.LogCustomLine("Tempo Avançado");
+            uIL.LogCustomLine(2,"Tempo Avançado");
         }
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y < -0.5f) {
             if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == true) {
                 LAmovDirectionN = true;
             }
             timeline.SetSliderValue(timeline.GetSliderValue() + (int)Math.Round(25 * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y));
-            uIL.LogCustomLine("Tempo Retrocedido");
+            uIL.LogCustomLine(2, "Tempo Retrocedido");
         }
 
         if(actualPlayingTest == 1 && testStarted == true && testFinished == false) {
@@ -437,9 +490,20 @@ public class MatchInterpreterController : MonoBehaviour {
             if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionN == true && LAmovDirectionO == true && LAmovDirectionL == true && rotationTest == true) {
                 LAmovDirectionS = true;
             }
-            if (actualPlayingTest != 0 && isShowingTestMessages) {
+            if (actualPlayingTest != 0 && (isShowingTestMessages)) {
                 ShowTestMessages();
-                currentTestMessages += 1;
+                if (actualPlayingTest == 3 && LAmovDirectionL) {
+                    currentTestMessages += 1;
+                    LAmovDirectionL = false;
+                    RemoveAllSelectionMarkers();
+                } 
+                else if(actualPlayingTest != 3) {
+                    currentTestMessages += 1;
+                }
+
+            } else if (isShowingAMessage) {
+                HideTestMessage();
+                PauseUnpause();
             } else {
                 PauseUnpause();
             }
@@ -450,73 +514,91 @@ public class MatchInterpreterController : MonoBehaviour {
                 Ray ray = new(leftController.position, leftController.forward);
                 laserLineRenderer.SetPosition(0, leftController.position);
                 if (Physics.Raycast(ray, out RaycastHit hit)) {
-                    Transform parent = hit.transform.parent;
-                    laserLineRenderer.SetPosition(1, hit.point);
+                    if(hit.transform.parent is not null || hit.transform.parent.name is not "Field") { 
+                        Transform parent = hit.transform.parent;
+                        laserLineRenderer.SetPosition(1, hit.point);
                     
-                    GameObject oldreferencia = referencia;
+                        GameObject oldreferencia = referencia;
                                         
-                    if (actualPlayingTest != 3 && actualPlayingTest != 4) {
-                        jsonReader.SetPlayerHeatMap(parent.gameObject, true);
-                        referencia = parent.GetComponentInChildren<Camera>().gameObject;
-                        referenciaName = parent.gameObject.name;
-                    }
-                    if (actualPlayingTest == 5 && testStarted == true && testFinished == false && rotationTest == false) {
-                        LAmovDirectionL = true;//Teste 5 de ativar multiplas uma trajetória
-                    }
-
-                    if (parent != null) {
-                        Tracer tracer = parent.GetComponentInChildren<Tracer>();
-                        if (tracer != null) {
-                            LineRenderer lineRenderer = tracer.GetComponent<LineRenderer>();
-                            if (lineRenderer != null) {
-
-                                if (lastLinerenderer is null) {
-                                    lastLinerenderer = lineRenderer;
+                        if (actualPlayingTest != 3 && actualPlayingTest != 4) {
+                            jsonReader.SetPlayerHeatMap(parent.gameObject, true);
+                            referencia = parent.GetComponentInChildren<Camera>().gameObject;
+                            referenciaName = parent.gameObject.name;
+                        }
+                        if (actualPlayingTest == 5 && testStarted == true && testFinished == false && rotationTest == false) {
+                            LAmovDirectionL = true;//Teste 5 de ativar multiplas uma trajetória
+                        }
+                        if (actualPlayingTest == 3) {
+                            if (!LAmovDirectionL)
+                                LAmovDirectionL = true;
+                            if (parent != null) { 
+                                if(currentTestMessages == 0) {
+                                    RemoveAllSelectionMarkers();
+                                    InstantiateSelectionMarker(parent.gameObject);
                                 }
-                                if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger)) { //Ativar 1 só
-                                    foreach (LineRenderer lr in lrList) {
-                                        lr.enabled = false;
-                                        lr.positionCount = 0;
-                                        if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionL == true && rotationTest == false) {
-                                            LAmovDirectionO = true;//Teste 1 de ativar uma trajetória
-                                        }
+                                else if(currentTestMessages == 1) {
+                                    InstantiateSelectionMarker(parent.gameObject);
+                                } 
+                                else if(currentTestMessages == 2) {
+                                    RemoveAllSelectionMarkers();
+                                    InstantiateSelectionMarker(parent.gameObject);
+                                }
+                            }
+                        }
+
+                        if (parent != null) {
+                            Tracer tracer = parent.GetComponentInChildren<Tracer>();
+                            if (tracer != null) {
+                                LineRenderer lineRenderer = tracer.GetComponent<LineRenderer>();
+                                if (lineRenderer != null && actualPlayingTest != 3) {
+                                    if (lastLinerenderer is null) {
+                                        lastLinerenderer = lineRenderer;
                                     }
-                                    lastLinerenderer.enabled = false;
-                                    lineRenderer.enabled = !lineRenderer.enabled;
-                                    jsonReader.PoupulatePathRender(parent.gameObject, currentFrame);
-                                } else {
-                                    lineRenderer.enabled = !lineRenderer.enabled;
-                                    if (lineRenderer.enabled != false)
+                                    if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger)) { //Ativar 1 só
+                                        foreach (LineRenderer lr in lrList) {
+                                            lr.enabled = false;
+                                            lr.positionCount = 0;
+                                            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionL == true && rotationTest == false) {
+                                                LAmovDirectionO = true;//Teste 1 de ativar uma trajetória
+                                            }
+                                        }
+                                        lastLinerenderer.enabled = false;
+                                        lineRenderer.enabled = !lineRenderer.enabled;
                                         jsonReader.PoupulatePathRender(parent.gameObject, currentFrame);
+                                    } else {
+                                        lineRenderer.enabled = !lineRenderer.enabled;
+                                        if (lineRenderer.enabled != false)
+                                            jsonReader.PoupulatePathRender(parent.gameObject, currentFrame);
+                                    }
+                                    lastLinerenderer = lineRenderer;
+                                    if (actualPlayingTest != 0) {
+                                        uIL.LogCustomLine(2, $"Jogador {parent.transform.name} Selecionado");
+                                    }
+                                    if (!setCameraOnHead && actualPlayingTest == 0) {
+                                        uIL.LogCustomLine(2, $"Path do Jogador {parent.transform.name} Ativado");
+                                    } else if (actualPlayingTest == 0) {
+                                        uIL.LogCustomLine(2, $"Visão Alternada Para {parent.transform.name}");
+                                    }
                                 }
-                                lastLinerenderer = lineRenderer;
-                                if (actualPlayingTest != 0) {
-                                    uIL.LogCustomLine($"Jogador {parent.transform.name} Selecionado");
-                                }
-                                if (!setCameraOnHead && actualPlayingTest == 0) {
-                                    uIL.LogCustomLine($"Path do Jogador {parent.transform.name} Ativado");
-                                } else if (actualPlayingTest == 0) {
-                                    uIL.LogCustomLine($"Visão Alternada Para {parent.transform.name}");
+                            }
+                            if (hit.transform.name is not "BallPrefab" && hit.transform.parent.name is not "Stadium") {
+                                if (OVRInput.GetDown(OVRInput.Button.Four)) {
+                                    if(actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == false) {
+                                        LAmovDirectionN = true;
+                                    }
+                                    setCameraOnHead = true;
+                                    timeSinceLineInteraction = 0f; // Reseta o acumulador de tempo
+                                    SetCameraToPlayer(playerController, referencia);
                                 }
                             }
                         }
-                        if (hit.transform.name is not "BallPrefab" && hit.transform.parent.name is not "Stadium") {
-                            if (OVRInput.GetDown(OVRInput.Button.Four)) {
-                                if(actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == false) {
-                                    LAmovDirectionN = true;
-                                }
-                                setCameraOnHead = true;
-                                timeSinceLineInteraction = 0f; // Reseta o acumulador de tempo
-                                SetCameraToPlayer(playerController, referencia);
-                            }
-                        }
-                    }
-                    if (hit.transform.name is "BallPrefab") { 
-                        LineRenderer balllineRenderer = hit.transform.GetComponentInChildren<LineRenderer>();
-                        if (balllineRenderer != null) {
-                            balllineRenderer.enabled = !balllineRenderer.enabled;
-                            uIL.LogCustomLine("Path da Bola Ativado");
+                        if (hit.transform.name is "BallPrefab") { 
+                            LineRenderer balllineRenderer = hit.transform.GetComponentInChildren<LineRenderer>();
+                            if (balllineRenderer != null) {
+                                balllineRenderer.enabled = !balllineRenderer.enabled;
+                                uIL.LogCustomLine(2, "Path da Bola Ativado");
 
+                            }
                         }
                     }
                 } else {
@@ -535,12 +617,12 @@ public class MatchInterpreterController : MonoBehaviour {
             }
             if (isSlowMotion) {
                 Time.timeScale = 1f; // restore normal speed
-                uIL.LogCustomLine("Slow Motion Off");
+                uIL.LogCustomLine(2,    "Slow Motion Off");
 
                 isSlowMotion = false;
             } else {
                 Time.timeScale = 0.33f; // slow down to 50% speed
-                uIL.LogCustomLine("Slow Motion On");
+                uIL.LogCustomLine(2, "Slow Motion On");
 
                 isSlowMotion = true;
             }
@@ -550,7 +632,7 @@ public class MatchInterpreterController : MonoBehaviour {
             if (actualPlayingTest == 5 && testStarted == true && testFinished == false && rotationTest == true) {
                 LAmovDirectionL = true;//Teste 1,1 de pause-resume
             }
-            uIL.LogCustomLine("Paths Desativados por Comando");
+            uIL.LogCustomLine(2, "Paths Desativados por Comando");
             foreach (LineRenderer lr in lrList) {
                 lr.enabled = false;
             }
@@ -569,10 +651,10 @@ public class MatchInterpreterController : MonoBehaviour {
             CharacterController cc = parent.GetComponent<CharacterController>();
             cc.enabled = false;
             if (isOnField) {
-                uIL.LogCustomLine("TP Campo");
+                uIL.LogCustomLine(2, "TP Campo");
                 cameraRig.transform.parent.position = new Vector3(0, 1, 0);
             } else {
-                uIL.LogCustomLine("TP Arquibancada");
+                uIL.LogCustomLine(2, "TP Arquibancada");
                 cameraRig.transform.parent.position = new Vector3(0, 17, -53);
             }
             cc.enabled = true;
@@ -593,13 +675,12 @@ public class MatchInterpreterController : MonoBehaviour {
         setTutorialonRightHand();
 
     }
-
     void SetCameraToPlayer(OVRPlayerController playerController, GameObject referencia) {
         if (referencia is not null) {
             
             if(setCameraOnHead == false) {
-                uIL.LogCustomLine($"Vendo o Ponto de Vista do Jogador {referenciaName}");
-                uIL.LogCustomLine("Saiu da Visão do Jogador");
+                uIL.LogCustomLine(2, $"Vendo o Ponto de Vista do Jogador {referenciaName}");
+                uIL.LogCustomLine(2, "Saiu da Visão do Jogador");
                 playerController.enabled = true;
                 setCameraOnHead = false;
                 return;
@@ -621,8 +702,8 @@ public class MatchInterpreterController : MonoBehaviour {
                     oculusInteractionSampleRig.transform.Rotate(0, -10, 0);
                 }
             } else if (OVRInput.Get(OVRInput.Button.Start) || setCameraOnHead == false) {
-                uIL.LogCustomLine($"Vendo o Ponto de Vista do Jogador {referenciaName}");
-                uIL.LogCustomLine("Saiu da Visão do Jogador");
+                uIL.LogCustomLine(2, $"Vendo o Ponto de Vista do Jogador {referenciaName}");
+                uIL.LogCustomLine(2, "Saiu da Visão do Jogador");
                 playerController.enabled = true;
                 setCameraOnHead = false;
                 return;
@@ -632,7 +713,7 @@ public class MatchInterpreterController : MonoBehaviour {
 
     void NextTest() {
         if(actualPlayingTest == 1) {
-            uIL.LogCustomLine("Pré-Treino de Movimentação Concluído");
+            uIL.LogCustomLine(3, "Pré-Treino de Movimentação Concluído");
             uML.LogCustomLine("Pré-Treino de Movimentação Concluído");
             ResetBooleans();
             ResetTest();
@@ -640,7 +721,7 @@ public class MatchInterpreterController : MonoBehaviour {
         }
         else if (actualPlayingTest == 2) {
             uML.LogCustomLine("Pré-Treino de Movimentação Olhando Concluído");
-            uIL.LogCustomLine("Pré-Treino de Movimentação Olhando Concluído");
+            uIL.LogCustomLine(3, "Pré-Treino de Movimentação Olhando Concluído");
 
             ResetBooleans();
             ResetTest();
@@ -649,7 +730,7 @@ public class MatchInterpreterController : MonoBehaviour {
         }
         else if (actualPlayingTest == 3) { //OLHA O ELSE IF...
             uML.LogCustomLine($"Cenário Tomada Decisão {currentTest1} Finalizado");
-            uIL.LogCustomLine($"Cenário Tomada Decisão {currentTest1} Finalizado");
+            uIL.LogCustomLine(3, $"Cenário Tomada Decisão {currentTest1} Finalizado");
             currentTest1 += 1;
             isShowingTestMessages = false;
 
@@ -660,13 +741,13 @@ public class MatchInterpreterController : MonoBehaviour {
             }
         } else if (actualPlayingTest == 4) {//OLHA O ELSE IF...
             uML.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
-            uIL.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
+            uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Finalizado");
             actualPlayingTest++;
             ResetBooleans();
 
         } else if (actualPlayingTest == 5) {//OLHA O ELSE IF...
             uML.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
-            uIL.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
+            uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Finalizado");
             actualPlayingTest++;
             ResetBooleans();
 
@@ -674,7 +755,6 @@ public class MatchInterpreterController : MonoBehaviour {
             EndTests();
             actualPlayingTest = 1;
         }
-        
     }
 
     void ResetBooleans() {
@@ -704,7 +784,7 @@ public class MatchInterpreterController : MonoBehaviour {
         HideTestMessage();
         ResetTest();
         uML.LogCustomLine("Todos os Testes Finalizados");
-        uIL.LogCustomLine("Todos os Testes Finalizados");
+        uIL.LogCustomLine(3, "Todos os Testes Finalizados");
         uML.CreateNewTestLogFile();
         uIL.CreateNewTestLogFile();
         actualPlayingTest = 0;
@@ -718,32 +798,35 @@ public class MatchInterpreterController : MonoBehaviour {
 
         textMesh.text = message;
         
-        uIL.LogCustomLine(message.Replace("\n", " "));
+        uIL.LogCustomLine(1, message.Replace("\n", " "));
     }
 
     private string[][] passDecisionTestMessages = new string[][]{
         new string[] { // pre testes (movimentação 1)
-            "Para ver o menu dos controles\nOlhe nas arquibancadas\nOu pressione B",
+            "Testes Iniciados!\n",
+            "Essa ferramenta fornece formas novas de\nvisualizar o REPLAY de uma partida de futebol\n",
+            "A finalidade dela não é ser um jogo\n",
+            "Para ver os controles\nOlhe nas arquibancadas\nOu pressione B",
             "Utilize o LA para movimentar",
             "Utilize o RA para rotacionar"
         },
         new string[] { // pre testes (movimentação 2)
-            "Você deverá se movimentar pela linha do meio campo\nOlhando para a bola",
-            "É muito importante que você acompanhe a bola\ne não a perca de visa"
+            "Você deverá atravessar o campo\nDe uma lateral para a outra\nSem sair da linha do meio campo\nOlhando para a bola",
+            "É muito importante que você acompanhe a bola\ne não a perca de vista"
         },
         new string[]{ // teste 1
             "Quem tocou a bola para você",
-            "O que opções de jogada você tem",
-            "Qual seria sua escolha nesse lance?\n(Passe,Drible,Chute...)"
+            "Quais possíveis opções de passe você tem",
+            "Qual seria sua decisão de passe nesse lance?"
         },
-        new string[]{ // teste 2
+        new string[]{ // teste 2 - Depois do trigger
             "A partir de agora você assumirá\n o controle desse jogador",
             "Ele é um volante\n do time vermelho",
             "Mova-se e posicione-se\n como se fosse você jogando",
             "Após pressionar A, a jogada continuará"
         },
         new string[]{ // teste 2
-            "O intúito desse teste é instruílo sobre as\ndiversas funcionalidades do sistema",
+            "O intuito deste teste é instruílo sobre as\ndiversas funcionalidades do sistema",
             "Após esse treinamento você terá um momento\npara usar o sistema como preferir",
             "Procure na arquibancada pela imagem com os controles"
         }
@@ -758,6 +841,7 @@ public class MatchInterpreterController : MonoBehaviour {
 
         if (currentTestMessages == passDecisionTestMessages[actualPlayingTest -1].Length) { 
             allMessagesHasBeenShown = true;
+            isShowingAMessage = false;
             isShowingTestMessages = false;
             currentTestMessages = 0;
             HideTestMessage();
@@ -771,14 +855,14 @@ public class MatchInterpreterController : MonoBehaviour {
                 allMessagesHasBeenShown = false;
             }//OLHA O ELSE IF...
             else if (actualPlayingTest == 2) {
-                ShowTestMessage("Treinamento de Movimentação\nOlhando para a bola\n" +
+                ShowTestMessage("Treinamento de Movimentação 2\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
                     $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }
             else if (actualPlayingTest == 3) { 
                 ShowTestMessage($"Cenário {currentTest1 + 1} de {totalTests1}\n" +
-                $"Responda em Voz Alta\n" +
+                $"Utilizando o Gatilho do Dedo Indicador\nDa Mão Esquerda Aponte\n" +
                 $"{passDecisionTestMessages[actualPlayingTest -1][currentTestMessages]}\n" +
                 $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
@@ -799,11 +883,11 @@ public class MatchInterpreterController : MonoBehaviour {
     }
     void ActivateTestMessage() {
         canvas.enabled = true;
+        isShowingAMessage = true;
     }
     void HideTestMessage() {
-        
         canvas.enabled = false;
-
+        isShowingAMessage = false;
     }
 
 }

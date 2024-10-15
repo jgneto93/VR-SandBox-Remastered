@@ -640,6 +640,7 @@ MonoBehaviour:
   CurrentRenderTexture: {fileID: 8400000, guid: 1cf0d49a08a1aa44ab018b0377c6a8a5, type: 2}
   NextRenderTexture: {fileID: 8400000, guid: 33cb4ca8cbe33b4419fa477f10510e35, type: 2}
   tutorial: {fileID: 1024925867}
+  selectionMarkerPrefab: {fileID: 798499878850837685, guid: 35643297a28d8ce44bd56ed6f3391fef, type: 3}
 --- !u!4 &258623296
 Transform:
   m_ObjectHideFlags: 0
@@ -1312,7 +1313,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1024925868
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1461,7 +1462,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5f1887913f7c0a04aa687db83c65b0be, type: 2}
+  - {fileID: 2100000, guid: e28b9a82c01733342be8297c01702595, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2420,18 +2421,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0950df82e7936c84983497630bde5b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 1
-  Damping: 1.5
+  Acceleration: 0.5
+  Damping: 1
   BackAndSideDampen: 1
   JumpForce: 0.3
   RotationAmount: 1.15
   RotationRatchet: 15
   SnapRotation: 0
   RotateAroundGuardianCenter: 0
-  FixedSpeedSteps: 0
+  FixedSpeedSteps: 1
   HmdResetsY: 1
   HmdRotatesY: 1
-  GravityModifier: 0.379
+  GravityModifier: 0.5
   useProfileData: 1
   EnableLinearMovement: 1
   EnableRotation: 1
@@ -2457,7 +2458,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
-  m_SlopeLimit: 45
+  m_SlopeLimit: 20
   m_StepOffset: 0.01
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -3106,7 +3107,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2255749197718732749, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -20.5
+      value: -30
       objectReference: {fileID: 0}
     - target: {fileID: 4092106040074325952, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_text
@@ -3161,6 +3162,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8720498143912555837, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
+      propertyPath: m_ScaleFactor
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8720498143912555837, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 0
       objectReference: {fileID: 0}
@@ -3174,7 +3179,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9148556536412110842, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_Color.a
-      value: 0.8235294
+      value: 0.74509805
       objectReference: {fileID: 0}
     - target: {fileID: 9148556536412110842, guid: e3d56bf067ab1824db44aa76224c854f, type: 3}
       propertyPath: m_Color.b

@@ -20,7 +20,7 @@ public class UserMovementLogger : MonoBehaviour {
             Vector3.Distance(lastPosition, transform.position) > positionThreshold ||
             Quaternion.Angle(lastRotation, transform.rotation) > rotationThreshold) {
 
-            string logEntry = $"{Time.time}, {transform.position}, {transform.rotation}";
+            string logEntry = $"{Time.unscaledTime}, {transform.position}, {transform.rotation}";
             File.AppendAllText(logFilePath, logEntry + "\n");
             lastTransform = transform;
             lastPosition = transform.position;
@@ -30,7 +30,7 @@ public class UserMovementLogger : MonoBehaviour {
 
     public void LogCustomLine(string line) {
         if (lastLog != line && line != "") {
-            string logEntry = $"{Time.time}: {line.Replace("\n", " ")}";
+            string logEntry = $"{Time.unscaledTime}: {line.Replace("\n", " ")}";
             File.AppendAllText(logFilePath, logEntry + "\n");
             lastLog = line;
         }
