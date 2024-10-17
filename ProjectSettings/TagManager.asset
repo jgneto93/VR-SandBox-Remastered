@@ -15,6 +15,7 @@ TagManager:
   - frustum
   - Bola
   - Joint
+  - NoHit
   layers:
   - Default
   - TransparentFX

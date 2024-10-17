@@ -43,7 +43,7 @@ public class MatchInterpreterController : MonoBehaviour {
     OVRPlayerController playerController;
 
     private int currentTest1 = 0;
-    private int totalTests1 = 10;
+    private int totalTests1 = 3;
 
     private bool allMessagesHasBeenShown = false;
     private bool isShowingTestMessages = false;
@@ -333,7 +333,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         playerController.enabled = true;
                         test2isMoving = true;
                     }
-                } else if (jsonReader.GetFrameIndex() >= 1100 && testFinished == false) {
+                } else if (jsonReader.GetFrameIndex() >= 1250 && testFinished == false) {
                     EnablePlayerAfterTest();
                     ShowTestMessage("Teste 2 Concluído\nPressione A para prosseguir");
                     if (!isPaused) {
@@ -486,7 +486,7 @@ public class MatchInterpreterController : MonoBehaviour {
         }
         
 
-        if (OVRInput.GetDown(OVRInput.Button.One)) { // Pausa ou despausa a cena
+        if (OVRInput.GetDown(OVRInput.Button.One)) {
             if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionN == true && LAmovDirectionO == true && LAmovDirectionL == true && rotationTest == true) {
                 LAmovDirectionS = true;
             }
@@ -510,11 +510,13 @@ public class MatchInterpreterController : MonoBehaviour {
         }
 
         if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger)) {
-            if (timeSinceLineInteraction >= .175f) {
-                Ray ray = new(leftController.position, leftController.forward);
-                laserLineRenderer.SetPosition(0, leftController.position);
-                if (Physics.Raycast(ray, out RaycastHit hit)) {
-                    if(hit.transform.parent is not null || hit.transform.parent.name is not "Field") { 
+            Ray ray = new(leftController.position, leftController.forward);
+            laserLineRenderer.SetPosition(0, leftController.position);
+            if (Physics.Raycast(ray, out RaycastHit hit)) {
+                laserLineRenderer.SetPosition(1, hit.point);
+
+                //if (timeSinceLineInteraction >= .5f) {
+                    if (hit.transform.parent is not null ) { 
                         Transform parent = hit.transform.parent;
                         laserLineRenderer.SetPosition(1, hit.point);
                     
@@ -600,15 +602,21 @@ public class MatchInterpreterController : MonoBehaviour {
 
                             }
                         }
-                    }
+                    //}
                 } else {
-                    laserLineRenderer.SetPosition(1, ray.GetPoint(100)); // Set the end position of the laser line to a point far away
+                    laserLineRenderer.SetPosition(1, ray.GetPoint(100)); 
                     jsonReader.SetPlayerHeatMap(null, true);
                 }
-                laserLineRenderer.enabled = true; // Show the laser line
+                laserLineRenderer.enabled = true;
+                //timeSinceLineInteraction = 0f;
+            } 
+            else {
+                laserLineRenderer.SetPosition(1, leftController.forward * 100);
             }
         } else {
-            laserLineRenderer.enabled = false; // Hide the laser line
+            laserLineRenderer.SetPosition(1, leftController.forward * 100);
+
+            laserLineRenderer.enabled = false;
         }
 
         if (OVRInput.GetDown(OVRInput.Button.Three)) {
@@ -849,32 +857,32 @@ public class MatchInterpreterController : MonoBehaviour {
 
         else {
             if(actualPlayingTest == 1) {
-                ShowTestMessage("Treinamento de Movimentação\n" +
+                ShowTestMessage(//"Treinamento de Movimentação\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
                     $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }//OLHA O ELSE IF...
             else if (actualPlayingTest == 2) {
-                ShowTestMessage("Treinamento de Movimentação 2\n" +
+                ShowTestMessage(//"Treinamento de Movimentação 2\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
                     $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }
             else if (actualPlayingTest == 3) { 
-                ShowTestMessage($"Cenário {currentTest1 + 1} de {totalTests1}\n" +
+                ShowTestMessage(//$"Cenário {currentTest1 + 1} de {totalTests1}\n" +
                 $"Utilizando o Gatilho do Dedo Indicador\nDa Mão Esquerda Aponte\n" +
                 $"{passDecisionTestMessages[actualPlayingTest -1][currentTestMessages]}\n" +
                 $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }//OLHA O ELSE IF...
             else if(actualPlayingTest == 4) {
-                ShowTestMessage($"Teste 2: Movimentação\n" +
+                ShowTestMessage(//"Teste 2: Movimentação\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
                     $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             } 
             else if (actualPlayingTest == 5) {
-                ShowTestMessage($"Treinamento: Comandos\n" +
+                ShowTestMessage(//$"Treinamento: Comandos\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
                     $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
