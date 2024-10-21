@@ -2961,6 +2961,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a431ad12ac7c2644dbd0c954af8c2f86, type: 3}
+      propertyPath: m_TagString
+      value: NoHit
+      objectReference: {fileID: 0}
     - target: {fileID: 921391927218321214, guid: a431ad12ac7c2644dbd0c954af8c2f86, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -4194,9 +4198,9 @@ GameObject:
   - component: {fileID: 1715740666}
   - component: {fileID: 1715740665}
   - component: {fileID: 1715740664}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Field
-  m_TagString: Untagged
+  m_TagString: NoHit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4401,15 +4405,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0950df82e7936c84983497630bde5b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 0.5
+  Acceleration: 0.42
   Damping: 1
   BackAndSideDampen: 1
   JumpForce: 0.3
-  RotationAmount: 1.15
+  RotationAmount: 1.05
   RotationRatchet: 15
   SnapRotation: 0
   RotateAroundGuardianCenter: 0
-  FixedSpeedSteps: 1
+  FixedSpeedSteps: 0
   HmdResetsY: 1
   HmdRotatesY: 1
   GravityModifier: 0.5
@@ -4438,7 +4442,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
-  m_SlopeLimit: 20
+  m_SlopeLimit: 10
   m_StepOffset: 0.01
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
