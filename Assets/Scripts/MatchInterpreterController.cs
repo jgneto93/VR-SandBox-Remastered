@@ -13,6 +13,14 @@ public class MatchInterpreterController : MonoBehaviour {
     private bool isOnField = true;
     public Timeline timeline;
 
+    public GameObject leftHandSubtitles;
+    public GameObject rightHandSubtitles;
+
+
+    public GameObject leftHandButtons;
+    public GameObject rightHandButtons;
+
+
     public bool newVisualization = true;
     public RenderTexture CurrentRenderTexture;
     public RenderTexture NextRenderTexture;
@@ -35,8 +43,6 @@ public class MatchInterpreterController : MonoBehaviour {
     GameObject referencia = null;
     string referenciaName = "";
 
-    public GameObject tutorial;
-    private bool isTutorialActive = false;
     private List<LineRenderer> lrList;
     OVRPlayerController playerController;
 
@@ -135,11 +141,6 @@ public class MatchInterpreterController : MonoBehaviour {
         }
     }
 
-    void setTutorialonRightHand() {
-        tutorial.transform.position = rightController.transform.position;
-        tutorial.transform.LookAt(oculusInteractionSampleRig.transform);
-        tutorial.transform.Rotate(90, -90, 0);
-    }
 
     void PauseUnpause() {
         if (!isPaused) {
@@ -238,9 +239,8 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                         testStarted = true;
                         ShowTestMessage(//$"Teste {currentTest1 + 1} de {totalTests1} Iniciado\n" +
-                                "Para esse Teste Você Utilizará o\nGatilho do Dedo Indicador Da Mão Esquerda\n" +
+                                "Nesse instante você assistirá o replay\nPelo ponto de vista de um jogador\nNo momento apenas aguarde\n" +
                                 "Ao Pressionar A a cena continuará\n" +
-                                $"Atenção\n" +
                                 "--Pressione A--");
                     }
                 }
@@ -383,7 +383,7 @@ public class MatchInterpreterController : MonoBehaviour {
                             ShowTestMessage("Utilize o botão X para\nAtivar/Desativar a câmera lenta");
                         } 
                         if (LAmovDirectionL == true && LAmovDirectionO == true && LAmovDirectionN == false) {
-                            ShowTestMessage("Utilize o RHT + RA para\nAvançar ou Retroceder o tempo\nNo meio da sua tela é possível ver a barra de progresso do replay");
+                            ShowTestMessage("Utilize o RHT + RA para\nAvançar ou Retroceder o tempo\nNo meio da sua tela é possível ver\na barra de progresso do replay");
                         }
                         if (LAmovDirectionL == true && LAmovDirectionO == true && LAmovDirectionN == true) {
                             ShowTestMessage("Utilize o botão A para\nPausar / Resumir  a cena");
@@ -420,11 +420,11 @@ public class MatchInterpreterController : MonoBehaviour {
             }
         }
         
-
-        if (OVRInput.GetDown(OVRInput.Button.Two) && !OVRInput.GetDown(OVRInput.Button.Four) && (!OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) || !OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger))) {
-            uIL.LogCustomLine(2,$"Tutorial {isTutorialActive}");
-            isTutorialActive = !isTutorialActive;
-            tutorial.SetActive(isTutorialActive);
+        if (OVRInput.GetDown(OVRInput.Button.Two)) {
+            rightHandSubtitles.SetActive(!rightHandSubtitles.activeSelf);
+            leftHandSubtitles.SetActive(!leftHandSubtitles.activeSelf);
+            leftHandButtons.SetActive(!leftHandButtons.activeSelf);
+            rightHandButtons.SetActive(!rightHandButtons.activeSelf);
         }
 
         if (playerController.enabled is false && setCameraOnHead == true) {
@@ -672,7 +672,8 @@ public class MatchInterpreterController : MonoBehaviour {
             jsonReader.InstantiatePlayersFromFrame(jsonReader.currentFrameIndex);
         }
         jsonReader.UpdateShirtNumberRotation(oculusInteractionSampleRig.transform);
-        setTutorialonRightHand();
+        
+        
 
     }
     void SetCameraToPlayer(OVRPlayerController playerController, GameObject referencia) {
@@ -808,9 +809,7 @@ public class MatchInterpreterController : MonoBehaviour {
             "Testes Iniciados!\n",
             "Essa ferramenta fornece formas novas de\nvisualizar o REPLAY de uma partida de futebol\n",
             "A finalidade dela não é ser um jogo\n",
-            "Para ver as instruções de uso\nOlhe nas arquibancadas\nOu pressione B",
-            "Utilize o LA para movimentar",
-            "Utilize o RA para girar"
+            "Para ver as instruções de uso\nOlhe nas arquibancadas\nOu aperte B"
         },
         new string[]{ // teste 1
             "Quem tocou a bola para você\nEscolha UM",
@@ -818,6 +817,7 @@ public class MatchInterpreterController : MonoBehaviour {
             "Qual seria sua decisão de passe nesse lance\nEscolha UM"
         },
         new string[] { // pre testes (movimentação 2)
+            "Esse treinamento tem o intuito de\nacostumá-lo com a movimentação da ferramenta",
             "Você deverá atravessar o campo\nDe uma lateral para a outra\nSem sair da linha do meio campo\nOlhando para a bola",
             "É muito importante que você acompanhe a bola\ne não a perca de vista"
         },
@@ -825,12 +825,12 @@ public class MatchInterpreterController : MonoBehaviour {
             "A partir de agora você assumirá\n o controle desse jogador",
             "Ele é um volante\n do time vermelho",
             "Mova-se e posicione-se\n como se fosse você jogando",
-            "Após pressionar A, a jogada continuará"
+            "Após apertar o botão A, a jogada continuará"
         },
         new string[]{ // teste 2
             "O intuito deste teste é instruílo sobre as\ndiversas funcionalidades do sistema",
             "Após esse treinamento você terá um momento\npara usar o sistema como preferir",
-            "Procure na arquibancada pela imagem com as instruções de uso"
+            "Procure na arquibancada pela\nimagem com as instruções de uso"
         }
     };
 
@@ -859,7 +859,7 @@ public class MatchInterpreterController : MonoBehaviour {
             
             else if (actualPlayingTest == 2) { 
                 ShowTestMessage(//$"Cenário {currentTest1 + 1} de {totalTests1}\n" +
-                $"APONTE\n" +
+                $"APONTE SEGURANDO\no gatilho indicador do dedo esquerdo\n" +
                 $"{passDecisionTestMessages[actualPlayingTest -1][currentTestMessages]}\n" +
                 $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
