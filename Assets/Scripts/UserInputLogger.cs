@@ -40,8 +40,11 @@ public class UserInputLogger : MonoBehaviour {
             // Subtrai 1 (arquivo de controle) e divide por 2 (arquivos do UserMovementLogger)
             int logFileIndex = ((fileCount) / 2) + 1;
 
-            // Cria o novo arquivo de log
-            string newLogFilePath = Path.Combine(Application.persistentDataPath, $"UserInputLog{logFileIndex}.txt");
+            // Obtém a data e hora atuais
+            string dateTimeString = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+            // Cria o novo arquivo de log com a data e hora no nome
+            string newLogFilePath = Path.Combine(Application.persistentDataPath, $"UserInputLog{logFileIndex}_{dateTimeString}.txt");
             File.Create(newLogFilePath).Dispose();
 
             logFilePath = newLogFilePath;
@@ -54,4 +57,5 @@ public class UserInputLogger : MonoBehaviour {
             Debug.LogError($"Erro ao criar o arquivo de log: {e.Message}");
         }
     }
+
 }
