@@ -36,7 +36,6 @@ public class MatchInterpreterController : MonoBehaviour {
     private UserInputLogger uIL;
 
     private bool logDetailed = false;
-    private float logInterval = 0.2f; // Intervalo de 0.25 segundos (4 vezes por segundo)
     private float timeSinceLastLog = 0f;
 
     private LineRenderer lastLinerenderer = null;
@@ -58,7 +57,7 @@ public class MatchInterpreterController : MonoBehaviour {
     public GameObject selectionMarkerPrefab;
     private List<GameObject> selectionmarkers = new(); 
 
-    private int actualPlayingTest = 0;
+    private int actualPlayingTest = 1;
     private int totalPlayingTest = 6;
 
     private bool testSetup = false;
@@ -134,7 +133,6 @@ public class MatchInterpreterController : MonoBehaviour {
         canvas = GameObject.Find("Subtitles").GetComponent<Canvas>();
         HideTestMessage();
 
-        playerObject = GameObject.Find("playerObject 5124");
         if (playerObject == null) {
             Debug.LogWarning("playerObject 5124 não encontrado no Start.");
         } else {
@@ -179,9 +177,7 @@ public class MatchInterpreterController : MonoBehaviour {
         
         timeSinceLastLog += Time.unscaledDeltaTime;
 
-        
-
-        if (timeSinceLastLog >= (logDetailed ? logInterval = 0.05f : logInterval = 0.025f)) {
+        if (timeSinceLastLog >= (logDetailed ? 0.05f : 0.025f)) {
             LogMovement();
             timeSinceLastLog = 0f; 
         }
@@ -230,7 +226,6 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                 }
             }
-            
             if (actualPlayingTest == 2) {
                 if (testSetup == false) {
                     jsonReader.SetFrameIndex(frameNumbers[currentTest1] - 450);
@@ -240,7 +235,6 @@ public class MatchInterpreterController : MonoBehaviour {
                     SetCameraToPlayer(playerController, referencia);
                     testSetup = true;
                 }
-
                 if (testSetup && !testStarted) {
                     if (!isPaused) {
                         PauseUnpause();
@@ -251,8 +245,8 @@ public class MatchInterpreterController : MonoBehaviour {
                                 "--Pressione A--");
 
                     }
-                    uML.LogCustomLine($"Cenário Tomada Decisão {currentTest1} Iniciado");
-                    uIL.LogCustomLine(3, $"Cenário Tomada Decisão {currentTest1} Iniciado");
+                    uML.LogCustomLine($"Cenario Tomada Decisao {currentTest1} Iniciado");
+                    uIL.LogCustomLine(3, $"Cenario Tomada Decisao {currentTest1} Iniciado");
                     logDetailed = true;
                 }
                 
@@ -266,8 +260,8 @@ public class MatchInterpreterController : MonoBehaviour {
                         HideTestMessage();
                         PauseUnpause();
                         testFinished = true;
-                        uML.LogCustomLine($"Cenário Tomada Decisão {currentTest1} Finalizado");
-                        uIL.LogCustomLine(3, $"Cenário Tomada Decisão {currentTest1} Finalizado");
+                        uML.LogCustomLine($"Cenario Tomada Decisao {currentTest1} Finalizado");
+                        uIL.LogCustomLine(3, $"Cenario Tomada Decisao {currentTest1} Finalizado");
                         logDetailed = false;
 
                     }
@@ -315,6 +309,8 @@ public class MatchInterpreterController : MonoBehaviour {
             if (actualPlayingTest == 4) {
                 if (testSetup == false && testStarted == false) {
                     jsonReader.SetFrameIndex(590);
+                    playerObject = GameObject.Find("playerObject 5124");
+
                     referencia = GameObject.Find("playerObject 5124").GetComponentInChildren<Camera>().gameObject;
                     if(!isPaused)
                         PauseUnpause();
@@ -336,8 +332,8 @@ public class MatchInterpreterController : MonoBehaviour {
                     if (allMessagesHasBeenShown && isPaused) {
                         PauseUnpause();
                         testStarted = true;
-                        uML.LogCustomLine($"Teste {actualPlayingTest} Iniciado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Iniciado");
+                        uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 1 Iniciado");
+                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 1 Iniciado");
                         logDetailed = true;
 
                     }
@@ -353,9 +349,9 @@ public class MatchInterpreterController : MonoBehaviour {
                     }
                 } else if (jsonReader.GetFrameIndex() >= 1250 && testFinished == false) {
                     EnablePlayerAfterTest();
-                    ShowTestMessage("Teste 2 Concluído\nPressione A para prosseguir");
-                    uML.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
-                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Finalizado");
+                    ShowTestMessage("Teste Movimentação 1 Concluído\nPressione A para prosseguir");
+                    uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 1 Finalizado");
+                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 1 Finalizado");
                     logDetailed = false;
 
                     if (!isPaused) {
@@ -367,8 +363,116 @@ public class MatchInterpreterController : MonoBehaviour {
                     NextTest();
                 }
             }
+            if (actualPlayingTest == 5) {
+                if (testSetup == false && testStarted == false) {
+                    jsonReader.SetFrameIndex(4500);
+                    referencia = GameObject.Find("playerObject 10046").GetComponentInChildren<Camera>().gameObject;
+                    if (!isPaused)
+                        PauseUnpause();
+                    setCameraOnHead = true;
+                    SetCameraToPlayer(playerController, referencia);
+                    isSlowMotion = true;
+                    ShowTestMessage("Teste de Movimentação 2 Iniciado\n" +
+                                      "Você fará o papel de um jogador\n" +
+                                      "Pressione A para continuar e AGUARDE...");
+                    testSetup = true;
 
-            if (actualPlayingTest == 5) { // Pré testes cenário livre
+                } else if (currentFrame >= 5000 && testStarted == false) {
+                    HideTestMessage();
+                    if (!isPaused) {
+                        PauseUnpause();
+                        DisablePlayerForTest();
+                    }
+                    ShowTestMessages();
+                    if (allMessagesHasBeenShown && isPaused) {
+                        PauseUnpause();
+                        testStarted = true;
+                        uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 2 Iniciado");
+                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 2 Iniciado");
+                        logDetailed = true;
+
+                    }
+                }
+                if (testStarted == true && test2isMoving == false) {
+                    if (testStarted == true) {
+                        if (playerController.enabled == false) {
+                            playerController.enabled = true;
+                        }
+                        setCameraOnHead = false;
+                        playerController.enabled = true;
+                        test2isMoving = true;
+                    }
+                } else if (jsonReader.GetFrameIndex() >= 5500 && testFinished == false) {
+                    EnablePlayerAfterTest();
+                    ShowTestMessage("Teste Movimentação 2 Concluído\nPressione A para prosseguir");
+                    uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 2 Finalizado");
+                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 2 Finalizado");
+                    logDetailed = false;
+
+                    if (!isPaused) {
+                        PauseUnpause();
+                    }
+                    if (isPaused) {
+                        testFinished = true;
+                    }
+                    NextTest();
+                }
+            }
+            if (actualPlayingTest == 6) {
+                if (testSetup == false && testStarted == false) {
+                    jsonReader.SetFrameIndex(5300);
+                    referencia = GameObject.Find("playerObject 27137").GetComponentInChildren<Camera>().gameObject;
+                    if (!isPaused)
+                        PauseUnpause();
+                    setCameraOnHead = true;
+                    SetCameraToPlayer(playerController, referencia);
+                    isSlowMotion = true;
+                    ShowTestMessage("Teste de Movimentação 3 Iniciado\n" +
+                                     "Você fará o papel de um jogador\n" +
+                                     "Pressione A para continuar e AGUARDE...");
+                    testSetup = true;
+
+                } else if (currentFrame >= 5750 && testStarted == false) {
+                    HideTestMessage();
+                    if (!isPaused) {
+                        PauseUnpause();
+                        DisablePlayerForTest();
+                    }
+                    ShowTestMessages();
+                    if (allMessagesHasBeenShown && isPaused) {
+                        PauseUnpause();
+                        testStarted = true;
+                        uML.LogCustomLine($"Teste {actualPlayingTest}Cenario Tomada Decisao ");
+                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest}Cenario Tomada Decisao ");
+                        logDetailed = true;
+                    }
+                }
+                if (testStarted == true && test2isMoving == false) {
+                    if (testStarted == true) {
+                        if (playerController.enabled == false) {
+                            playerController.enabled = true;
+                        }
+                        setCameraOnHead = false;
+                        playerController.enabled = true;
+                        test2isMoving = true;
+                    }
+                } else if (jsonReader.GetFrameIndex() >= 6250 && testFinished == false) {
+                    EnablePlayerAfterTest();
+                    ShowTestMessage("Teste Movimentação 3 Concluído\nPressione A para prosseguir");
+                    uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 3 Finalizado");
+                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 3 Finalizado");
+                    logDetailed = false;
+
+                    if (!isPaused) {
+                        PauseUnpause();
+                    }
+                    if (isPaused) {
+                        testFinished = true;
+                    }
+                    NextTest();
+                }
+            }
+            if (actualPlayingTest == 7) { // Pré testes cenário livre
                 if (testSetup == false) {
                     if (!isPaused)
                         PauseUnpause();
@@ -428,7 +532,7 @@ public class MatchInterpreterController : MonoBehaviour {
                 }
             }
 
-            if (actualPlayingTest == 6) {
+            if (actualPlayingTest == 8) {
                 if(testSetup == false) {
                     if (!isPaused)
                         PauseUnpause();
@@ -471,7 +575,7 @@ public class MatchInterpreterController : MonoBehaviour {
             uIL.LogCustomLine(2,"Tempo Avançado");
         }
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y < -0.2f) {
-            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == true) {
+            if (actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == true) {
                 LAmovDirectionN = true;
             }
             timeline.SetSliderValue(timeline.GetSliderValue() + (int)Math.Round(25 * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y));
@@ -517,7 +621,7 @@ public class MatchInterpreterController : MonoBehaviour {
         
 
         if (OVRInput.GetDown(OVRInput.Button.One)) {
-            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionN == true && LAmovDirectionO == true && LAmovDirectionL == true && rotationTest == true) {
+            if (actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionN == true && LAmovDirectionO == true && LAmovDirectionL == true && rotationTest == true) {
                 LAmovDirectionS = true;
             }
             if (actualPlayingTest != 0 && (isShowingTestMessages)) {
@@ -555,7 +659,7 @@ public class MatchInterpreterController : MonoBehaviour {
                             referencia = parent.GetComponentInChildren<Camera>().gameObject;
                             referenciaName = parent.gameObject.name;
                         }
-                        if (actualPlayingTest == 5 && testStarted == true && testFinished == false && rotationTest == false) {
+                        if (actualPlayingTest == 7 && testStarted == true && testFinished == false && rotationTest == false) {
                             LAmovDirectionL = true;//Teste 5 de ativar multiplas uma trajetória
                         }
                         if (actualPlayingTest == 2) {
@@ -588,7 +692,7 @@ public class MatchInterpreterController : MonoBehaviour {
                                         foreach (LineRenderer lr in lrList) {
                                             lr.enabled = false;
                                             lr.positionCount = 0;
-                                            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionL == true && rotationTest == false) {
+                                            if (actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionL == true && rotationTest == false) {
                                                 LAmovDirectionO = true;//Teste 1 de ativar uma trajetória
                                             }
                                         }
@@ -613,7 +717,7 @@ public class MatchInterpreterController : MonoBehaviour {
                             }
                             if (hit.transform.name is not "BallPrefab" && hit.transform.parent.name is not "Stadium") {
                                 if (OVRInput.GetDown(OVRInput.Button.Four)) {
-                                    if(actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == false) {
+                                    if(actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == false) {
                                         LAmovDirectionN = true;
                                     }
                                     setCameraOnHead = true;
@@ -647,7 +751,7 @@ public class MatchInterpreterController : MonoBehaviour {
         }
 
         if (OVRInput.GetDown(OVRInput.Button.Three)) {
-            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionL == true && rotationTest == true) {
+            if (actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionL == true && rotationTest == true) {
                 LAmovDirectionO = true;//Teste 1, 2 de Slowmo
             }
             if (isSlowMotion) {
@@ -664,7 +768,7 @@ public class MatchInterpreterController : MonoBehaviour {
         }
 
         if (OVRInput.GetDown(OVRInput.Button.Four)) { // desativa todos os tracers
-            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && rotationTest == true) {
+            if (actualPlayingTest == 7 && testStarted == true && testFinished == false && rotationTest == true) {
                 LAmovDirectionL = true;//Teste 1,1 de pause-resume
             }
             uIL.LogCustomLine(2, "Paths Desativados por Comando");
@@ -677,7 +781,7 @@ public class MatchInterpreterController : MonoBehaviour {
             if (playerController.enabled == false) {
                 playerController.enabled = true;
             }
-            if (actualPlayingTest == 5 && testStarted == true && testFinished == false && LAmovDirectionN == true && LAmovDirectionO == true && LAmovDirectionL == true && rotationTest == false) {
+            if (actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionN == true && LAmovDirectionO == true && LAmovDirectionL == true && rotationTest == false) {
                 LAmovDirectionS = true;
             }
             Transform parent = cameraRig.transform.parent;
@@ -775,7 +879,16 @@ public class MatchInterpreterController : MonoBehaviour {
             ResetBooleans();
 
         } else if (actualPlayingTest == 5) {//OLHA O ELSE IF...
+            actualPlayingTest++;
+            ResetBooleans();
+
+        } else if (actualPlayingTest == 6) {//OLHA O ELSE IF...
             
+            actualPlayingTest++;
+            ResetBooleans();
+
+        } else if (actualPlayingTest == 7) {//OLHA O ELSE IF...
+
             actualPlayingTest++;
             ResetBooleans();
 
@@ -852,6 +965,18 @@ public class MatchInterpreterController : MonoBehaviour {
             "Mova-se e posicione-se\n como se fosse você jogando",
             "Após apertar o botão A, a jogada continuará"
         },
+        new string[]{ // teste 2 - Depois do trigger
+            "A partir de agora você assumirá\n o controle desse jogador",
+            "Ele é um atacante\n do time azul",
+            "Mova-se e posicione-se\n como se fosse você jogando",
+            "Após apertar o botão A, a jogada continuará"
+        },
+        new string[]{ // teste 2 - Depois do trigger
+            "A partir de agora você assumirá\n o controle desse jogador",
+            "Ele é um atacante\n do time vermelho",
+            "Mova-se e posicione-se\n como se fosse você jogando",
+            "Após apertar o botão A, a jogada continuará"
+        },
         new string[]{ // teste 2
             "O intuito deste teste é instruílo sobre as\ndiversas funcionalidades do sistema",
             "Após esse treinamento você terá um momento\npara usar o sistema como preferir",
@@ -902,11 +1027,22 @@ public class MatchInterpreterController : MonoBehaviour {
                 allMessagesHasBeenShown = false;
             } 
             else if (actualPlayingTest == 5) {
+                ShowTestMessage(//"Teste 2: Movimentação\n" +
+                    $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
+                    $"-- Pressione A para continuar --");
+                allMessagesHasBeenShown = false;
+            } else if (actualPlayingTest == 6) {
+                ShowTestMessage(//"Teste 2: Movimentação\n" +
+                    $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
+                    $"-- Pressione A para continuar --");
+                allMessagesHasBeenShown = false;
+            } else if (actualPlayingTest == 7) {
                 ShowTestMessage(//$"Treinamento: Comandos\n" +
                     $"{passDecisionTestMessages[actualPlayingTest - 1][currentTestMessages]}\n" +
                     $"-- Pressione A para continuar --");
                 allMessagesHasBeenShown = false;
             }
+
         }
     }
     void ActivateTestMessage() {
