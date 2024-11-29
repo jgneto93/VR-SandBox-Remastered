@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
-
+using System.Collections;
 public class MatchInterpreterController : MonoBehaviour {
     public JSONReader jsonReader; // Reference to the JSONReader script
     public Camera mainCamera; // Reference to the main camera
@@ -72,6 +72,7 @@ public class MatchInterpreterController : MonoBehaviour {
     private bool rotationTest = false;
     GameObject cameraRig;
     Canvas canvas;
+    private float previousTimeScale = 1f;
 
     private float inicialTime;
 
@@ -134,6 +135,7 @@ public class MatchInterpreterController : MonoBehaviour {
         uIL = new();
         canvas = GameObject.Find("Subtitles").GetComponent<Canvas>();
         HideTestMessage();
+
     }
 
 
@@ -671,9 +673,11 @@ public class MatchInterpreterController : MonoBehaviour {
         }
 
         if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger)) {
-            Ray ray = new(leftController.position, leftController.forward);
+            laserLineRenderer.enabled = true;
             laserLineRenderer.SetPosition(0, leftController.position);
-            if (Physics.Raycast(ray, out RaycastHit hit)) {
+            Ray ray = new Ray(leftController.position, leftController.forward);
+            int layerMask = LayerMask.GetMask("Default");
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask)){
                 laserLineRenderer.SetPosition(1, hit.point);
 
                 //if (timeSinceLineInteraction >= .5f) {
@@ -771,7 +775,7 @@ public class MatchInterpreterController : MonoBehaviour {
                 //timeSinceLineInteraction = 0f;
             } 
             else {
-                laserLineRenderer.SetPosition(1, leftController.forward * 100);
+                laserLineRenderer.SetPosition(1, ray.GetPoint(100));
             }
         } else {
             laserLineRenderer.SetPosition(1, leftController.forward * 100);
