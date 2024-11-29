@@ -154,13 +154,12 @@ public class MatchInterpreterController : MonoBehaviour {
     }
 
     IEnumerator SmoothTimeScaleChange(float from, float to, bool isUnpausing) {
-        float duration = 1f; // Duration of the transition
+        float duration = .5f; // Duration of the transition
         float elapsed = 0f;
 
         while (elapsed < duration) {
             elapsed += Time.unscaledDeltaTime; // Use unscaledDeltaTime to run when timeScale is 0
             float t = elapsed / duration;
-
             float timeScale;
             if (isUnpausing) {
                 if (t < 0.5f)
@@ -173,11 +172,9 @@ public class MatchInterpreterController : MonoBehaviour {
                 else
                     timeScale = Mathf.Lerp(from * 0.5f, to, (t - 0.5f) * 2);
             }
-
             Time.timeScale = timeScale;
             yield return null;
         }
-
         Time.timeScale = to;
     }
 
@@ -779,7 +776,6 @@ public class MatchInterpreterController : MonoBehaviour {
             }
         } else {
             laserLineRenderer.SetPosition(1, leftController.forward * 100);
-
             laserLineRenderer.enabled = false;
         }
 
@@ -789,7 +785,7 @@ public class MatchInterpreterController : MonoBehaviour {
             }
             if (isSlowMotion) {
                 Time.timeScale = 1f; // restore normal speed
-                uIL.LogCustomLine(2,    "Slow Motion Off");
+                uIL.LogCustomLine(2, "Slow Motion Off");
 
                 isSlowMotion = false;
             } else {
