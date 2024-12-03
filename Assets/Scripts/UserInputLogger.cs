@@ -18,14 +18,15 @@ public class UserInputLogger : MonoBehaviour {
         types = new Dictionary<int, string> {
             { 1, "MENSAGEM" },
             { 2, "COMANDO" },
-            { 3, "INFO" }
+            { 3, "INFO" },
+            { 4, "DATA" }
         };
     }
 
-    public void LogCustomLine(int type, string line) {
+    public void LogCustomLine(int type, int currentFrame, string line) {
         if (line != "" && (!lastMessagesByType.ContainsKey(type) || lastMessagesByType[type] != line)) {
             string typeString = types.ContainsKey(type) ? types[type] : "UNKNOWN";
-            string logEntry = $"{Time.unscaledTime}, {typeString}, {line.Replace("\n", " ")}";
+            string logEntry = $"{Time.unscaledTime}; {currentFrame}; {typeString}; {line.Replace("\n", " ")}";
             File.AppendAllText(logFilePath, logEntry + "\n");
             lastMessagesByType[type] = line;
         }
@@ -40,7 +41,7 @@ public class UserInputLogger : MonoBehaviour {
             // Subtrai 1 (arquivo de controle) e divide por 2 (arquivos do UserMovementLogger)
             int logFileIndex = ((fileCount) / 2) + 1;
 
-            // Obtém a data e hora atuais
+            // Obtï¿½m a data e hora atuais
             string dateTimeString = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
             // Cria o novo arquivo de log com a data e hora no nome
