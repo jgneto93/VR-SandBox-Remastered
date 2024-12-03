@@ -103,7 +103,7 @@ public class MatchInterpreterController : MonoBehaviour {
             GameObject marker = Instantiate(selectionMarkerPrefab, markerPosition, Quaternion.identity);
             marker.transform.SetParent(target.transform);
             selectionmarkers.Add(marker);
-            uIL.LogCustomLine(2, $"Jogador Selecionado Para o Teste: {target.transform.name}");
+            uIL.LogCustomLine(2, currentFrame,$"Jogador Selecionado Para o Teste: {target.transform.name}");
         } else if (selectionMarkerPrefab == null) {
             Debug.LogWarning("Prefab de indicador visual nao atribuido.");
         }
@@ -141,11 +141,11 @@ public class MatchInterpreterController : MonoBehaviour {
 
     void PauseUnpause() {
         if (!isPaused) {
-            uIL.LogCustomLine(2, "A-Pause");
+            uIL.LogCustomLine(2,currentFrame, "A-Pause");
             previousTimeScale = Time.timeScale;
             StartCoroutine(SmoothTimeScaleChange(Time.timeScale, 0f, false));
         } else {
-            uIL.LogCustomLine(2, "A-Resume");
+            uIL.LogCustomLine(2,currentFrame, "A-Resume");
             StartCoroutine(SmoothTimeScaleChange(Time.timeScale, previousTimeScale, true));
         }
 
@@ -222,7 +222,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         testSetup = true;
                         testStarted = true;
                         uML.LogCustomLine($"Treinamento 1 Iniciado");
-                        uIL.LogCustomLine(3, $"Treinamento 1 Iniciado");
+                        uIL.LogCustomLine(3,currentFrame, $"Treinamento 1 Iniciado");
                     }
                 }
                 if (testStarted == true && testFinished == false) {
@@ -244,7 +244,7 @@ public class MatchInterpreterController : MonoBehaviour {
                                             "--Quando Preparado Pressione A--");
                             testFinished = true;
                             uML.LogCustomLine($"Treinamento 1 Finalizado");
-                            uIL.LogCustomLine(3, $"Treinamento 1 Finalizado");
+                            uIL.LogCustomLine(3,currentFrame, $"Treinamento 1 Finalizado");
                         }
                     }
                 }
@@ -276,7 +276,7 @@ public class MatchInterpreterController : MonoBehaviour {
                 }
                 if(currentFrame > (frameNumbers[currentTest1] - (450 + 1)) && !registredStart && !testFinished && testStarted) {
                     uML.LogCustomLine($"Cenario Tomada Decisao {currentTest1} Iniciado");
-                    uIL.LogCustomLine(3, $"Cenario Tomada Decisao {currentTest1} Iniciado");  
+                    uIL.LogCustomLine(3,currentFrame, $"Cenario Tomada Decisao {currentTest1} Iniciado");  
                     registredStart = true; 
                 }
                 if (currentFrame >= (frameNumbers[currentTest1] - 3) && currentFrame <= (frameNumbers[currentTest1] + 3) && !testFinished) {
@@ -290,7 +290,9 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                         testFinished = true;
                         uML.LogCustomLine($"Cenario Tomada Decisao {currentTest1} Finalizado");
-                        uIL.LogCustomLine(3, $"Cenario Tomada Decisao {currentTest1} Finalizado");
+                        Vector3 ballPos = jsonReader.GetBallPosition();
+                        uIL.LogCustomLine(4,currentFrame, $"Posição da Bola: {ballPos}");
+                        uIL.LogCustomLine(3,currentFrame, $"Cenario Tomada Decisao {currentTest1} Finalizado");
                         logDetailed = false;
                         registredStart = false;
                     }
@@ -314,7 +316,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         testStarted = true;
                         playerController.enabled = true;
                         uML.LogCustomLine($"Teste {actualPlayingTest} Iniciado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Iniciado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Iniciado");
                     }
                 }
                 if (testStarted && testSetup) {
@@ -322,7 +324,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                     if (oculusInteractionSampleRig.transform.position.z >= 35) {
                         uML.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Finalizado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Finalizado");
                         ShowTestMessage("Treinamento Concluido\nPrepare-se ate se sentir confortavel\nAo pressionar A os testes iniciarao");
                     }
                     if (OVRInput.GetDown(OVRInput.Button.One) && oculusInteractionSampleRig.transform.position.z >= 35) {
@@ -362,7 +364,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                         testStarted = true;
                         uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 1 Iniciado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 1 Iniciado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Movimentacao 1 Iniciado");
                         logDetailed = true;
 
                     }
@@ -380,7 +382,7 @@ public class MatchInterpreterController : MonoBehaviour {
                     EnablePlayerAfterTest();
                     ShowTestMessage("Teste Movimentacao 1 Concluido\nPressione A para prosseguir");
                     uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 1 Finalizado");
-                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 1 Finalizado");
+                    uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Movimentacao 1 Finalizado");
                     logDetailed = false;
 
                     if (!isPaused) {
@@ -417,7 +419,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                         testStarted = true;
                         uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 2 Iniciado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 2 Iniciado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Movimentacao 2 Iniciado");
                         logDetailed = true;
 
                     }
@@ -435,7 +437,7 @@ public class MatchInterpreterController : MonoBehaviour {
                     EnablePlayerAfterTest();
                     ShowTestMessage("Teste Movimentacao 2 Concluido\nPressione A para prosseguir");
                     uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 2 Finalizado");
-                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 2 Finalizado");
+                    uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Movimentacao 2 Finalizado");
                     logDetailed = false;
 
                     if (!isPaused) {
@@ -472,7 +474,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                         testStarted = true;
                         uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 3 Inciado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 3 Inciado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Movimentacao 3 Inciado");
                         logDetailed = true;
                     }
                 }
@@ -489,7 +491,7 @@ public class MatchInterpreterController : MonoBehaviour {
                     EnablePlayerAfterTest();
                     ShowTestMessage("Teste Movimentacao 3 Concluido\nPressione A para prosseguir");
                     uML.LogCustomLine($"Teste {actualPlayingTest} Movimentacao 3 Finalizado");
-                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Movimentacao 3 Finalizado");
+                    uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Movimentacao 3 Finalizado");
                     logDetailed = false;
 
                     if (!isPaused) {
@@ -512,7 +514,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         testSetup = true;
                         testStarted = true;
                         uML.LogCustomLine($"Teste {actualPlayingTest} Iniciado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Iniciado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Iniciado");
                     }
 
                 }
@@ -552,7 +554,7 @@ public class MatchInterpreterController : MonoBehaviour {
 
                             testFinished = true;
                             uML.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
-                            uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Iniciado");
+                            uIL.LogCustomLine(3,currentFrame,$"Teste {actualPlayingTest} Iniciado");
                         }
                     }
                 }
@@ -566,7 +568,7 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                     inicialTime = Time.unscaledTime;
                     jsonReader.SetFrameIndex(2200);
-                    uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Iniciado");
+                    uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Iniciado");
                     uML.LogCustomLine($"Teste {actualPlayingTest} Iniciado");
                     ShowTestMessage("Teste 3\n Uso Livre da Ferramenta\nPor 2 minutos voce estara livre para usar a ferramenta\n da forma que mais te agradar");
                     PauseUnpause();
@@ -577,7 +579,7 @@ public class MatchInterpreterController : MonoBehaviour {
                     if (Time.unscaledTime - inicialTime > 120.0f) {
                         testFinished = true;
                         uML.LogCustomLine($"Teste {actualPlayingTest} Finalizado");
-                        uIL.LogCustomLine(3, $"Teste {actualPlayingTest} Finalizado");
+                        uIL.LogCustomLine(3,currentFrame, $"Teste {actualPlayingTest} Finalizado");
                         ShowTestMessage("Testes Finalizados!\nVoce Pode Retirar o Oculus Agora!");
                     }
                 }
@@ -600,14 +602,14 @@ public class MatchInterpreterController : MonoBehaviour {
 
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y > 0.2f) {
             timeline.SetSliderValue(timeline.GetSliderValue() + (int)Math.Round(25 * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y));
-            uIL.LogCustomLine(2,"Tempo Avancado");
+            uIL.LogCustomLine(2,currentFrame,"Tempo Avancado");
         }
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger) && OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y < -0.2f) {
             if (actualPlayingTest == 7 && testStarted == true && testFinished == false && LAmovDirectionO == true && LAmovDirectionO == true && rotationTest == true) {
                 LAmovDirectionN = true;
             }
             timeline.SetSliderValue(timeline.GetSliderValue() + (int)Math.Round(25 * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y));
-            uIL.LogCustomLine(2, "Tempo Retrocedido");
+            uIL.LogCustomLine(2,currentFrame, "Tempo Retrocedido");
         }
 
         if(actualPlayingTest == 1 && testStarted == true && testFinished == false) {
@@ -736,12 +738,12 @@ public class MatchInterpreterController : MonoBehaviour {
                                     }
                                     lastLinerenderer = lineRenderer;
                                     if (actualPlayingTest != 0) {
-                                        uIL.LogCustomLine(2, $"Jogador {parent.transform.name} Selecionado");
+                                        uIL.LogCustomLine(4, currentFrame, $"Jogador {parent.transform.name} Selecionado; {parent.transform.position}; {parent.transform.rotation}");
                                     }
                                     if (!setCameraOnHead && actualPlayingTest == 0) {
-                                        uIL.LogCustomLine(2, $"Path do Jogador {parent.transform.name} Ativado");
+                                        uIL.LogCustomLine(2, currentFrame, $"Path do Jogador {parent.transform.name} Ativado");
                                     } else if (actualPlayingTest == 0) {
-                                        uIL.LogCustomLine(2, $"Visao Alternada Para {parent.transform.name}");
+                                        uIL.LogCustomLine(2, currentFrame, $"Visao Alternada Para {parent.transform.name}");
                                     }
                                 }
                             }
@@ -759,7 +761,7 @@ public class MatchInterpreterController : MonoBehaviour {
                             LineRenderer balllineRenderer = hit.transform.GetComponentInChildren<LineRenderer>();
                             if (balllineRenderer != null) {
                                 balllineRenderer.enabled = !balllineRenderer.enabled;
-                                uIL.LogCustomLine(2, "Path da Bola Ativado");
+                                uIL.LogCustomLine(2, currentFrame,"Path da Bola Ativado");
 
                             }
                         }
@@ -785,12 +787,12 @@ public class MatchInterpreterController : MonoBehaviour {
             }
             if (isSlowMotion) {
                 Time.timeScale = 1f; // restore normal speed
-                uIL.LogCustomLine(2, "Slow Motion Off");
+                uIL.LogCustomLine(2,currentFrame, "Slow Motion Off");
 
                 isSlowMotion = false;
             } else {
                 Time.timeScale = 0.33f; // slow down to 50% speed
-                uIL.LogCustomLine(2, "Slow Motion On");
+                uIL.LogCustomLine(2,currentFrame, "Slow Motion On");
 
                 isSlowMotion = true;
             }
@@ -800,7 +802,7 @@ public class MatchInterpreterController : MonoBehaviour {
             if (actualPlayingTest == 7 && testStarted == true && testFinished == false && rotationTest == true) {
                 LAmovDirectionL = true;//Teste 1,1 de pause-resume
             }
-            uIL.LogCustomLine(2, "Paths Desativados por Comando");
+            uIL.LogCustomLine(2,currentFrame, "Paths Desativados por Comando");
             foreach (LineRenderer lr in lrList) {
                 lr.enabled = false;
             }
@@ -819,10 +821,10 @@ public class MatchInterpreterController : MonoBehaviour {
             CharacterController cc = parent.GetComponent<CharacterController>();
             cc.enabled = false;
             if (isOnField) {
-                uIL.LogCustomLine(2, "TP Campo");
+                uIL.LogCustomLine(2,currentFrame, "TP Campo");
                 cameraRig.transform.parent.position = new Vector3(0, 1, 0);
             } else {
-                uIL.LogCustomLine(2, "TP Arquibancada");
+                uIL.LogCustomLine(2,currentFrame, "TP Arquibancada");
                 cameraRig.transform.parent.position = new Vector3(0, 17, -53);
             }
             cc.enabled = true;
@@ -848,8 +850,8 @@ public class MatchInterpreterController : MonoBehaviour {
         if (referencia is not null) {
             
             if(setCameraOnHead == false) {
-                uIL.LogCustomLine(2, $"Vendo o Ponto de Vista do Jogador {referenciaName}");
-                uIL.LogCustomLine(2, "Saiu da Visao do Jogador");
+                uIL.LogCustomLine(2,currentFrame, $"Vendo o Ponto de Vista do Jogador {referenciaName}");
+                uIL.LogCustomLine(2, currentFrame,"Saiu da Visao do Jogador");
                 playerController.enabled = true;
                 setCameraOnHead = false;
                 return;
@@ -871,8 +873,8 @@ public class MatchInterpreterController : MonoBehaviour {
                     oculusInteractionSampleRig.transform.Rotate(0, -10, 0);
                 }
             } else if (OVRInput.Get(OVRInput.Button.Start) || setCameraOnHead == false) {
-                uIL.LogCustomLine(2, $"Vendo o Ponto de Vista do Jogador {referenciaName}");
-                uIL.LogCustomLine(2, "Saiu da Visao do Jogador");
+                uIL.LogCustomLine(2,currentFrame, $"Vendo o Ponto de Vista do Jogador {referenciaName}");
+                uIL.LogCustomLine(2,currentFrame, "Saiu da Visao do Jogador");
                 playerController.enabled = true;
                 setCameraOnHead = false;
                 return;
@@ -954,7 +956,7 @@ public class MatchInterpreterController : MonoBehaviour {
         HideTestMessage();
         ResetTest();
         uML.LogCustomLine("Todos os Testes Finalizados!");
-        uIL.LogCustomLine(3, "Todos os Testes Finalizados!");
+        uIL.LogCustomLine(3,currentFrame, "Todos os Testes Finalizados!");
         uML.CreateNewTestLogFile();
         uIL.CreateNewTestLogFile();
         actualPlayingTest = 0;
@@ -968,7 +970,7 @@ public class MatchInterpreterController : MonoBehaviour {
 
         textMesh.text = message;
         
-        uIL.LogCustomLine(1, message.Replace("\n", " "));
+        uIL.LogCustomLine(1,currentFrame, message.Replace("\n", " "));
     }
 
     private string[][] passDecisionTestMessages = new string[][]{
