@@ -414,6 +414,9 @@ public class JSONReader : MonoBehaviour {
         return closestLimb; // Retorna o limb mais atrasado com base no teamId
     }
 
+    public Vector3 GetBallPosition(int frameId){
+        return ballPositions[frameId];
+    }
     
     public GameObject offsideLineTeam0;
     public GameObject offsideLineTeam1;
