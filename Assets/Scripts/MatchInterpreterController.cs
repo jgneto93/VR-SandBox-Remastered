@@ -6,7 +6,6 @@ using Unity.VisualScripting;
 using System.Collections;
 public class MatchInterpreterController : MonoBehaviour {
     public JSONReader jsonReader; // Reference to the JSONReader script
-    public Camera mainCamera; // Reference to the main camera
     private Transform rightController; // Reference to the right controller
     private Transform leftController; // Reference to the right controller
     private LineRenderer laserLineRenderer; // Reference to the LineRenderer component
@@ -22,9 +21,6 @@ public class MatchInterpreterController : MonoBehaviour {
     public GameObject rightHandButtons;
 
 
-    public bool newVisualization = true;
-    public RenderTexture CurrentRenderTexture;
-    public RenderTexture NextRenderTexture;
     private bool isSlowMotion = false;
     private bool isPaused = true;
     int currentFrame = 0;
@@ -202,7 +198,6 @@ public class MatchInterpreterController : MonoBehaviour {
 
     void Update() {
         currentFrame = jsonReader.GetFrameIndex();
-        
         timeSinceLastLog += Time.unscaledDeltaTime;
 
         if (timeSinceLastLog >= (logDetailed ? 0.05f : 0.025f)) {
@@ -290,9 +285,8 @@ public class MatchInterpreterController : MonoBehaviour {
                         PauseUnpause();
                         testFinished = true;
                         uML.LogCustomLine($"Cenario Tomada Decisao {currentTest1} Finalizado");
-                        Vector3 ballPos = jsonReader.GetBallPosition();
-                        uIL.LogCustomLine(4,currentFrame, $"Posição da Bola: {ballPos}");
-                        uIL.LogCustomLine(3,currentFrame, $"Cenario Tomada Decisao {currentTest1} Finalizado");
+                        uIL.LogCustomLine(4, currentFrame, $"Posição da Bola: {jsonReader.GetBallPosition(currentFrame)}");
+                        uIL.LogCustomLine(3, currentFrame, $"Cenario Tomada Decisao {currentTest1} Finalizado");
                         logDetailed = false;
                         registredStart = false;
                     }
@@ -821,10 +815,10 @@ public class MatchInterpreterController : MonoBehaviour {
             CharacterController cc = parent.GetComponent<CharacterController>();
             cc.enabled = false;
             if (isOnField) {
-                uIL.LogCustomLine(2,currentFrame, "TP Campo");
+                uIL.LogCustomLine(2, currentFrame, "TP Campo");
                 cameraRig.transform.parent.position = new Vector3(0, 1, 0);
             } else {
-                uIL.LogCustomLine(2,currentFrame, "TP Arquibancada");
+                uIL.LogCustomLine(2, currentFrame, "TP Arquibancada");
                 cameraRig.transform.parent.position = new Vector3(0, 17, -53);
             }
             cc.enabled = true;
